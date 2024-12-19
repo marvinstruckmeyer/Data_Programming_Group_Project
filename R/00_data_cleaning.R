@@ -16,7 +16,7 @@ write.csv(election_data_short, "election_data_short.csv")
 
 
 # Data Cleaning -----------------------------------------------------------
-# do the data cleaning for the surveys object
+## do the data cleaning for the surveys object
 
 # Clean historical surveys
 surveys_clean <- surveys %>%
@@ -47,3 +47,6 @@ surveys_clean <- surveys %>%
 
 # Print summary to check the results
 summary(surveys_clean)
+
+## now clean the ...
+
