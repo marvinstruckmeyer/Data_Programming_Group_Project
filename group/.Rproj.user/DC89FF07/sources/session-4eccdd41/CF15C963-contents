@@ -1,0 +1,161 @@
+---
+title: "Group Task"
+author: "C. Tangana (DNI: 00000000-X), Rosalía (DNI: 00000000-X), ..."
+format:
+  html:
+    theme: [style.scss]
+    toc: true
+    toc-location: right
+    toc-title: Índice
+    embed-resources: true
+---
+
+## Instructions (read before starting)
+
+-   Modify within the `.qmd` document your personal data (names and ID) located in the header of the file.
+
+-   Make sure, **BEFORE further editing** the document, that the `.qmd` file is rendered correctly and the corresponding `.html` is generated in your local folder on your computer.
+
+-   The chunks (code boxes) created are either empty or incomplete. Once you edit what you consider, you must change each chunk to `#| eval: true` (or remove it directly) for them to run.
+
+-   Remember that you can run chunk by chunk with the *play* button or run all chunks up to a given chunk (with the button to the left of the previous one).
+
+### Required packages
+
+> Insert in the lower chunk the packages you will need
+
+```{r}
+rm(list = ls())
+library(tidyverse)
+```
+
+## Group task
+
+### Data
+
+The practice will be based on the **electoral data archives** below, compiling data on elections to the Spanish Congress of Deputies from 2008 to the present, as well as surveys, municipalities codes and abbreviations.
+
+```{r}
+# NO TOQUES NADA
+election_data <- read_csv(file = "./data/datos_elecciones_brutos.csv")
+cod_mun <- read_csv(file = "./data/cod_mun.csv")
+surveys <- read_csv(file = "./data/historical_surveys.csv")
+abbrev <- read_csv(file = "./data/siglas.csv")
+```
+
+The data will be as follows:
+
+-   `election_data`: file with election data for Congress from 2018 to the last ones in 2019.
+
+    -   `tipo_eleccion`: type of election (02 if congressional election)
+    -   `anno`, `mes`: year and month of elections
+    -   `vuelta`: electoral round (1 if first round)
+    -   `codigo_ccaa, codigo_provincia, codigo_municipio, codigo_distrito_electoral`: code of the ccaa, province, municipality and electoral district.
+    -   `numero_mesas`: number of polling stations
+    -   `censo`: census
+    -   `participacion_1, participacion_2`: participation in the first preview (14:00) and second preview (18:00) before polls close (20:00)
+    -   `votos_blancos`: blank ballots
+    -   `votos_candidaturas`: party ballots
+    -   `votos_nulos`: null ballots
+    -   ballots for each party
+
+-   `cod_mun`: file with the codes and names of each municipality
+
+-   `abbrev`: acronyms and names associated with each party
+
+-   `surveys`: table of electoral polls since 1982. Some of the variables are the following:
+
+    -   `type_survey`: type of survey (national, regional, etc.)
+    -   `date_elec`: date of future elections
+    -   `id_pollster`, `pollster`, `media`: id and name of the polling company, as well as the media that commissioned it.
+    -   `field_date_from`, `field_date_to`: start and end date of fieldwork
+    -   `exit_poll`: whether it is an exit poll or not
+    -   `size`: sample size
+    -   `turnout`: turnout estimate
+    -   estimated voting intentions for the main parties
+
+### Objectives and mandatory items
+
+The objective of the delivery is to perform an analysis of the electoral data, carrying out the debugging, summaries and graphs you consider, both of their results and the accuracy of the electoral polls.
+
+Specifically, **you must work only in the time window that includes the elections from 2008 to the last elections of 2019**.
+
+#### General comments
+
+In addition to what you see fit to execute, the following items are mandatory:
+
+-   Each group should **present before 9th January (23:59) an analysis of the data** in `.qmd` and `.html` format in **Quarto slides** mode, which **will be the ones they will present on the day of the presentation**.
+
+- **Quarto slides should be uploaded to Github** (the link should be provided by a member of each group).
+
+- The **maximum number of slides** should be 40. The **maximum time for each group** will be 20-22 minutes (+5 minutes for questions).
+
+-   During the presentation you will **explain (summarised!) the analysis performed** so that **each team member speaks for a similar amount of time** and **each member can be asked about any of the steps**. The grade does not have to be the same for all members. 
+
+-   It will be valued not only the content but also the container (aesthetics).
+
+-   The **objective is to demonstrate that the maximum knowledge of the course has been acquired**: the more content of the syllabus is included, the better.
+
+#### Mandatory items:
+
+1. Data should be **converted to tidydata** where appropriate.
+
+2. You should **include at least one join** between tables.
+
+3. Reminder: information = variance, so **remove columns that are not going to contribute anything**.
+
+4. The **glue and lubridate** packages should be used at some point, as well as the **forcats**. The use of **ggplot2** will be highly valued.
+
+5. The following should be used at least once:
+    -   mutate
+    -   summarise
+    -   group_by (or equivalent)
+    -   case_when
+
+6. We have many, many parties running for election. **We will only be interested in the following parties**:
+
+    -   PARTIDO SOCIALISTA OBRERO ESPAÑOL (beware: it has/had federations - branches - with some other name).
+    -   PARTIDO POPULAR
+    -   CIUDADANOS (caution: has/had federations - branches - with some other name)
+    -   PARTIDO NACIONALISTA VASCO
+    -   BLOQUE NACIONALISTA GALLEGO
+    -   CONVERGÈNCIA I UNIÓ
+    -   UNIDAS PODEMOS - IU (beware that here they have had various names - IU, podem, ezker batua, ...- and have not always gone together, but here we will analyze them together)
+    -   ESQUERRA REPUBLICANA DE CATALUNYA
+    -   EH - BILDU (are now a coalition of parties formed by Sortu, Eusko Alkartasuna, Aralar, Alternatiba)
+    -   MÁS PAÍS
+    -   VOX
+
+7. Anything other than any of the above parties should be imputed as "OTHER". Remember to add properly the data after the previous recoding.
+
+8.   Party acronyms will be used for the visualizations. The inclusion of graphics will be highly valued (see <https://r-graph-gallery.com/>).
+
+9. You must use all 4 data files at some point.
+
+10.  You must define at least one (non-trivial) function of your own.
+
+11.  You will have to discard mandatory polls that:
+
+    -   refer to elections before 2018
+    -   that are exit polls
+    -   have a sample size of less than 750 or are unknown
+    -   that have less than 1 or less fieldwork days
+
+12.   You must obligatorily answer the following questions (plus those that you consider analyzing to distinguish yourself from the rest of the teams, either numerically and/or graphically)
+
+    -   Which party was the winner in the municipalities with more than 100,000 habitants (census) in each of the elections?
+    -   Which party was the second when the first was the PSOE? And when the first was the PP?
+    -   Who benefits from low turnout?
+    -   How to analyze the relationship between census and vote? Is it true that certain parties win in rural areas?
+    -   How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?
+    -   Which polling houses got it right the most and which ones deviated the most from the results?
+
+**You should include at least 3 more "original" questions** that you think that it could be interesting to be answer with the data.
+
+#### Marks
+
+**The one who does the most things will not be valued the most**. More is not always better. The **originality** (with respect to the rest of the works, for example in the analyzed or in the subject or ...) of what has been proposed, in the handling of tables (or in the visualization), the **caring** put in the delivery (care in life is important) and the **relevance** of what has been done will be valued. Once you have the mandatory items with your database more or less completed, **think before** chopping code: what could be interesting? What do I need to get a summary both numerical and visual?
+
+Remember that the real goal is to demonstrate a mastery of the tools seen throughout the course. And that happens not only by the quantity of them used but also by the quality when executing them.
+
+**Some dataviz will be extremely positive valued**.
