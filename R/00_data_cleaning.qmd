@@ -1,0 +1,148 @@
+---
+title: "Data Programming - Group Assignment"
+format: html
+editor: source
+---
+
+# DATA CLEANING PROCESS
+
+In the following chunk, I will load the packages that I will use for the data cleaning process.
+
+```{r}
+#| messsages: false
+#| warning: false
+
+library(tidyverse)
+```
+
+Before proceeding, I will first load all the data files:
+
+```{r}
+#| messsages: false
+#| warning: false
+
+election_data <- read_csv("data/raw/datos_elecciones_brutos.csv")
+cod_mun <- read_csv("data/raw/cod_mun.csv")
+surveys <- read_csv("data/raw/historical_surveys.csv")
+abbrev <- read_csv("data/raw/siglas.csv")
+```
+
+Now I will take a look to each of them, clean them one by one and join them if necessary so we can work with as few data files as possible.
+
+## election_data
+
+First I will use `pivot_longer( )` to create a new variable that stores the name of each party, and another one that includes the number of votes for each of them:
+
+```{r}
+election_data <- election_data |> 
+  pivot_longer(cols = -(tipo_eleccion:votos_candidaturas), 
+               names_to = "partido",
+               values_to = "num_votos")           
+```
+
+Then, I remove the `tipo_eleccion`variable, because all of them are parliamentary elections, so it does not provide any useful information:
+
+```{r}
+election_data <- election_data |> 
+  select(-tipo_eleccion)
+```
+
+Now I will select only those parties we are interested in:
+
+-   PARTIDO SOCIALISTA OBRERO ESPAÑOL (beware: it has/had federations - branches - with some other name).
+-   PARTIDO POPULAR
+-   CIUDADANOS (caution: has/had federations - branches - with some other name)
+-   PARTIDO NACIONALISTA VASCO
+-   BLOQUE NACIONALISTA GALLEGO
+-   CONVERGÈNCIA I UNIÓ
+-   UNIDAS PODEMOS - IU (beware that here they have had various names - IU, podem, ezker batua, …- and have not always gone together, but here we will analyze them together)
+-   ESQUERRA REPUBLICANA DE CATALUNYA
+-   EH - BILDU (are now a coalition of parties formed by Sortu, Eusko Alkartasuna, Aralar, Alternatiba)
+-   MÁS PAÍS
+-   VOX
+
+The rest of them will be classified as "OTHER".
+
+```{r}
+election_data <- election_data |> 
+  mutate(
+    partido_2 = case_when(
+      str_detect(partido, "CIUDADANOS[-,]? PARTIDO DE LA CIUDADANÍA") ~ "CIUDADANOS",
+      str_detect(partido, "PSOE|PARTIDO SOCIALISTA") ~ "PSOE",
+      str_detect(partido, "PARTIDO POPULAR") ~ "PARTIDO POPULAR",
+      partido == "PARTIDO NACIONALISTA VASCO" ~ "PARTIDO NACIONALISTA VASCO",
+      partido == "BLOQUE NACIONALISTA GALLEGO" ~ "BLOQUE NACIONALISTA GALLEGO",
+      partido == "CONVERGÈNCIA I UNIÓ" ~ "CONVERGÈNCIA I UNIÓ",
+      partido == "UNIDAS PODEMOS - IU" ~ "UNIDAS PODEMOS-IU",
+      partido == "ESQUERRA REPUBLICANA DE CATALUNYA" ~ "ESQUERRA REPUBLICANA DE CATALUNYA",
+      str_detect(partido, "BILDU") ~ "EH-BILDU",
+      str_detect(partido, "MÁS PAÍS") ~ "MÁS PAÍS",
+      partido == "VOX" ~ "VOX",
+      TRUE ~ "OTHER"
+    )
+  )
+```
+
+## surveys
+
+For this dataframe I also need to use `pivot_longer( )` to create a new variable that stores the name of each party, and another one that includes the voting intention for each of them:
+
+```{r}
+surveys <- surveys |> 
+  pivot_longer(cols = -(type_survey:turnout), 
+               names_to = "party_name",
+               values_to = "vote_intention")           
+```
+
+Now, I remove the `type_survey` variable, because all of them are national surveys, so it does not provide any useful information:
+
+```{r}
+surveys <- surveys |> 
+  select(-type_survey)
+```
+
+Then, I will remove...
+
+-   Surveys before 2008
+-   Surveys whose sample size is less than 750 or NA
+-   Surveys whose fieldwork days is 1 or less
+-   Surveys that are exit_polls (exit_poll = TRUE)
+
+```{r}
+# I create a new variable called fieldwork_days:
+
+surveys <- surveys |>
+  mutate(fieldwork_days = as.numeric(field_date_to - field_date_from)) |> 
+  relocate(fieldwork_days, .after = field_date_to)
+
+# I filter according to the instructions:
+
+surveys <- surveys |> 
+  filter(date_elec >= as.Date("2008-01-01"),                  
+         size >= 750,            
+         !is.na(size),           
+         fieldwork_days > 1,            
+         exit_poll == FALSE)
+```
+
+Finally, I will filter the parties again:
+
+```{r}
+
+```
+
+## Joining dataframes
+
+cod_mun --\> election data
+
+Create a new variable called “cod_mun” pasting values from `codigo_ccaa`, `codigo_provincia` and `codigo_municipio` and then use it as a key so we are able to join the `cod_mun` dataframe.
+
+```{r}
+
+```
+
+We can also join the `abbrev` dataframe to both the `surveys` and the `election_data` dataframes. In that way, that will leave us with just two dataframes: `election_data` and `surveys` which will make our coding easier later.
+
+```{r}
+
+```
