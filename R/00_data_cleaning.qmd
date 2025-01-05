@@ -141,8 +141,19 @@ Create a new variable called “cod_mun” pasting values from `codigo_ccaa`, `c
 
 ```
 
-We can also join the `abbrev` dataframe to both the `surveys` and the `election_data` dataframes. In that way, that will leave us with just two dataframes: `election_data` and `surveys` which will make our coding easier later.
+We can also join the `abbrev` dataframe to both the `surveys` and the `election_data` dataframes. In that way, we will be left with just two dataframes: `election_data` and `surveys` which will make our coding easier later.
 
 ```{r}
 
 ```
+
+
+## Export to data/processed
+
+```{r}
+saveRDS(election_data, "data/processed/election_data.rds")
+saveRDS(surveys, "data/processed/surveys.rds")
+# saveRDS(abbrev, "data/processed/clean_election_data.rds")
+# saveRDS(election_data, "data/processed/clean_election_data.rds")
+```
+
