@@ -1,6 +1,5 @@
 library(tidyverse)
 library(ggplot2)
-library(sf)
 
 Sys.setlocale("LC_ALL", "en_US.UTF-8")
 
