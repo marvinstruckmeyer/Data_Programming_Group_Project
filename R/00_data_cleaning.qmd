@@ -4,7 +4,7 @@ format: html
 editor: source
 ---
 
-# DATA CLEANING PROCESS
+ fi# DATA CLEANING PROCESS
 
 In the following chunk, I will load the packages that I will use for the data cleaning process.
 
@@ -20,6 +20,7 @@ Before proceeding, I will first load all the data files:
 ```{r}
 #| messsages: false
 #| warning: false
+#| eval: false
 
 election_data <- read_csv("data/raw/datos_elecciones_brutos.csv")
 cod_mun <- read_csv("data/raw/cod_mun.csv")
@@ -40,11 +41,12 @@ election_data <- election_data |>
                values_to = "num_votos")           
 ```
 
-Then, I remove the `tipo_eleccion`variable, because all of them are parliamentary elections, so it does not provide any useful information:
+Then, I remove the `tipo_eleccion`variable, because all of them are parliamentary elections, so it does not provide any useful information. I do the same with the `vuelta` variable, because parliamentary election in Spain only have one round (in contrast to ballotage systems).
 
 ```{r}
 election_data <- election_data |> 
-  select(-tipo_eleccion)
+  select(-tipo_eleccion) |> 
+  select(-vuelta)
 ```
 
 Now I will select only those parties we are interested in:
@@ -68,20 +70,46 @@ election_data <- election_data |>
   mutate(
     partido_2 = case_when(
       str_detect(partido, "CIUDADANOS[-,]? PARTIDO DE LA CIUDADANÍA") ~ "CIUDADANOS",
-      str_detect(partido, "PSOE|PARTIDO SOCIALISTA") ~ "PSOE",
+      str_detect(partido, "PSOE|PARTIDO SOCIALISTA") ~ "PARTIDO SOCIALISTA OBRERO ESPAÑOL",
       str_detect(partido, "PARTIDO POPULAR") ~ "PARTIDO POPULAR",
-      partido == "PARTIDO NACIONALISTA VASCO" ~ "PARTIDO NACIONALISTA VASCO",
-      partido == "BLOQUE NACIONALISTA GALLEGO" ~ "BLOQUE NACIONALISTA GALLEGO",
-      partido == "CONVERGÈNCIA I UNIÓ" ~ "CONVERGÈNCIA I UNIÓ",
-      partido == "UNIDAS PODEMOS - IU" ~ "UNIDAS PODEMOS-IU",
-      partido == "ESQUERRA REPUBLICANA DE CATALUNYA" ~ "ESQUERRA REPUBLICANA DE CATALUNYA",
+      str_detect(partido, "PARTIDO NACIONALISTA VASCO") ~ "PARTIDO NACIONALISTA VASCO",
+      str_detect(partido, "BLOQUE NACIONALISTA GALEGO") ~ "BLOQUE NACIONALISTA GALEGO",
+      str_detect(partido, "CONVERGÈNCIA I UNIÓ | CONVERGENCIA I UNIO") ~ "CONVERGÈNCIA I UNIÓ",
+      str_detect(partido, "PODEM | IZQUIERDA UNIDA") ~ "UNIDAS PODEMOS - IU",
+      str_detect(partido, "ESQUERRA REPUBLICANA DE CATALUNYA") ~ "ESQUERRA REPUBLICANA DE CATALUNYA",
       str_detect(partido, "BILDU") ~ "EH-BILDU",
       str_detect(partido, "MÁS PAÍS") ~ "MÁS PAÍS",
-      partido == "VOX" ~ "VOX",
+      str_detect(partido, "VOX") ~ "VOX",
       TRUE ~ "OTHER"
     )
   )
+
+# IMPORTANT: From now on, remember to use the variable "partido_2" for the analysis.
+# I didn't want to delete the original party variable just in case we need it for reference
 ```
+
+Finally, I will create an additional variable including the acronyms of the parties. I thought about joining the `abbrev` dataset using `left_join()` but there were so many inconsistencies in the different names that it was easier and quicker to just add a new column.
+
+```{r}
+election_data <- election_data |> 
+  mutate(siglas = case_when(
+    partido_2 == "CIUDADANOS" ~ "CS",
+      partido_2 == "PARTIDO SOCIALISTA OBRERO ESPAÑOL" ~ "PSOE",
+      partido_2 == "PARTIDO POPULAR" ~ "PP",
+      partido_2 == "PARTIDO NACIONALISTA VASCO" ~ "EAJ-PNV",
+      partido_2 == "BLOQUE NACIONALISTA GALLEGO" ~ "BNG",
+      partido_2 == "CONVERGÈNCIA I UNIÓ" ~ "CIU",
+      partido_2 == "UNIDAS PODEMOS - IU" ~ "UP",
+      partido_2 == "ESQUERRA REPUBLICANA DE CATALUNYA" ~ "ERC",
+      partido_2 == "EH-BILDU" ~ "EH-BILDU",
+      partido_2 == "MÁS PAÍS" ~ "MP",
+      partido_2 == "VOX" ~ "VOX",
+      TRUE ~ "OTHER"
+    )
+  ) |> 
+  relocate(siglas, .before = partido_2)
+```
+
 
 ## surveys
 
@@ -125,35 +153,122 @@ surveys <- surveys |>
          exit_poll == FALSE)
 ```
 
-Finally, I will filter the parties again:
+Finally, I will filter the parties again. But first, I will create an additional variable including the name of the parties (the original dataset only includes acronyms). Again, I also thought about joining the `abbrev` dataset using `left_join()` but there were so many inconsistencies in the different denominations that it was easier and quicker to just add a new column.
 
 ```{r}
-
+surveys <- surveys |>
+  rename(party_abbrev = party_name) |> 
+  mutate(
+    party_name = case_when(
+      party_abbrev == "CS" ~ "CIUDADANOS",
+      party_abbrev == "PSOE" ~ "PARTIDO SOCIALISTA OBRERO ESPAÑOL",
+      party_abbrev == "PP" ~ "PARTIDO POPULAR",
+      party_abbrev == "EAJ-PNV" ~ "PARTIDO NACIONALISTA VASCO",
+      party_abbrev == "BNG" ~ "BLOQUE NACIONALISTA GALLEGO",
+      party_abbrev == "CIU" ~ "CONVERGÈNCIA I UNIÓ",
+      party_abbrev == "UP" ~ "UNIDAS PODEMOS - IU",
+      party_abbrev == "ERC" ~ "ESQUERRA REPUBLICANA DE CATALUNYA",
+      party_abbrev == "EH-BILDU" ~ "EH-BILDU",
+      party_abbrev == "MP" ~ "MÁS PAÍS",
+      party_abbrev == "VOX" ~ "VOX",
+      TRUE ~ "OTHER"
+    )
+  ) |> 
+  relocate(party_name, .before = party_abbrev)
 ```
 
 ## Joining dataframes
 
-cod_mun --\> election data
-
-Create a new variable called “cod_mun” pasting values from `codigo_ccaa`, `codigo_provincia` and `codigo_municipio` and then use it as a key so we are able to join the `cod_mun` dataframe.
+As a last step, I will create a new variable in the `election_data` dataframe called “cod_mun”. I will do that pasting values from `codigo_ccaa`, `codigo_provincia` and `codigo_municipio` columns and then use it as a key so we are able to join the `cod_mun` dataframe.
 
 ```{r}
-
+election_data <- election_data |> 
+  mutate(cod_mun = paste(codigo_ccaa, codigo_provincia, codigo_municipio, sep = "-")) |> 
+  relocate(cod_mun, .before = codigo_ccaa) |> 
+  left_join(cod_mun, by = "cod_mun") |> 
+  relocate(municipio, .before = cod_mun)
 ```
-
-We can also join the `abbrev` dataframe to both the `surveys` and the `election_data` dataframes. In that way, we will be left with just two dataframes: `election_data` and `surveys` which will make our coding easier later.
-
-```{r}
-
-```
-
 
 ## Export to data/processed
 
 ```{r}
 saveRDS(election_data, "data/processed/election_data.rds")
 saveRDS(surveys, "data/processed/surveys.rds")
-# saveRDS(abbrev, "data/processed/clean_election_data.rds")
-# saveRDS(election_data, "data/processed/clean_election_data.rds")
+```
+
+
+# POTENTIAL CARTOGRAM VISUALIZATION
+
+
+## Importing and joining province population data
+
+```{r}
+library(rvest)
+
+province_pop <- 'https://www.ign.es/web/ane-datos-geograficos/-/datos-geograficos/datosPoblacion?tipoBusqueda=provincias'
+
+province_pop <- read_html("https://www.ign.es/web/ane-datos-geograficos/-/datos-geograficos/datosPoblacion?tipoBusqueda=provincias") |>
+  html_elements("table") |>
+  _[[2]] |> #I select only the first table
+  html_table() |> 
+  janitor::clean_names() |> 
+  mutate(cod_ine = sprintf("%02d", as.numeric(cod_ine)), # Includes the "zeros"
+         poblacion = as.numeric(gsub("\\.", "", poblacion)),
+         superf_km2 = as.numeric(gsub("\\.", "", superf_km2))
+         ) |> 
+  rename(codigo_provincia = cod_ine)
+```
+
+## Filtering the data
+
+```{r}
+elections_1911 <- election_data |> 
+  filter(anno == 2019 & mes == 11) |> 
+  left_join(province_pop, by = "codigo_provincia") |> 
+  select(municipio, cod_mun, codigo_provincia, num_votos, siglas, partido, partido_2, provincia, poblacion)
+
+winners <- elections_1911 |> 
+  group_by(codigo_provincia, partido_2) |>  
+  summarise(votos_totales = sum(num_votos, na.rm = TRUE)) |> 
+  slice_max(votos_totales)
+```
+
+
+```{r}
+library(mapSpain)
+library(sf)
+library(cartogram)
+
+# Datos
+provinces <- esp_get_prov() |> 
+  mutate(provincia = prov.shortname.en) |> 
+  mutate(codigo_provincia = cpro) |> 
+  select(provincia, codigo_provincia)
+
+# Mapa base
+provinces_map <- ggplot(provinces) +
+  geom_sf()
+
+
+# Set Mercator projection
+
+prov_3857 <- st_transform(provinces, 3857)
+
+
+# Join dataframes
+
+
+```
+
+
+```{r}
+party_colors <- c(
+  "PSOE" = "#F93D46",
+  "PP" = "#41A4F5",
+  "VOX" = "#53FF53",
+  "ERC" = "#FF9E33",
+  "PNV" = "#04B82B",
+  "OTHER" = "#C0C0C0"
+)
 ```
 
