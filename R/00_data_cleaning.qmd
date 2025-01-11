@@ -4,7 +4,7 @@ format: html
 editor: source
 ---
 
- fi# DATA CLEANING PROCESS
+# DATA CLEANING PROCESS
 
 In the following chunk, I will load the packages that I will use for the data cleaning process.
 
@@ -12,7 +12,11 @@ In the following chunk, I will load the packages that I will use for the data cl
 #| messsages: false
 #| warning: false
 
+library(gert)
+
 library(tidyverse)
+library(stringi) 
+library(rvest)
 ```
 
 Before proceeding, I will first load all the data files:
@@ -20,7 +24,6 @@ Before proceeding, I will first load all the data files:
 ```{r}
 #| messsages: false
 #| warning: false
-#| eval: false
 
 election_data <- read_csv("data/raw/datos_elecciones_brutos.csv")
 cod_mun <- read_csv("data/raw/cod_mun.csv")
@@ -69,14 +72,14 @@ The rest of them will be classified as "OTHER".
 election_data <- election_data |> 
   mutate(
     partido_2 = case_when(
-      str_detect(partido, "CIUDADANOS[-,]? PARTIDO DE LA CIUDADANÍA") ~ "CIUDADANOS",
-      str_detect(partido, "PSOE|PARTIDO SOCIALISTA") ~ "PARTIDO SOCIALISTA OBRERO ESPAÑOL",
+      str_detect(partido, "PARTIDO DE LA CIUDADANIA|PARTIDO DE LA CIUDADANÍA") ~ "CIUDADANOS",
+      str_detect(partido, "PSOE|PARTIDO SOCIALISTA|PARTIT DELS SOCIALISTES DE CATALUNYA|PARTIT SOCIALISTA OBRER ESPANYOL|PARTIDO DOS SOCIALISTAS DE GALICIA") ~ "PARTIDO SOCIALISTA OBRERO ESPAÑOL",
       str_detect(partido, "PARTIDO POPULAR") ~ "PARTIDO POPULAR",
       str_detect(partido, "PARTIDO NACIONALISTA VASCO") ~ "PARTIDO NACIONALISTA VASCO",
       str_detect(partido, "BLOQUE NACIONALISTA GALEGO") ~ "BLOQUE NACIONALISTA GALEGO",
-      str_detect(partido, "CONVERGÈNCIA I UNIÓ | CONVERGENCIA I UNIO") ~ "CONVERGÈNCIA I UNIÓ",
-      str_detect(partido, "PODEM | IZQUIERDA UNIDA") ~ "UNIDAS PODEMOS - IU",
-      str_detect(partido, "ESQUERRA REPUBLICANA DE CATALUNYA") ~ "ESQUERRA REPUBLICANA DE CATALUNYA",
+      str_detect(partido, "CONVERGENCIA I UNIO|CONVERGÈNCIA I UNIÓ|CONVERGÈNCIA i UNIÓ") ~ "CONVERGÈNCIA I UNIÓ",
+      str_detect(partido, "PODEM|IZQUIERDA UNIDA|ESQUERRA UNIDA|ESQUERDA UNIDA|EZKER BATUA|UNIDAD POPULAR") ~ "UNIDAS PODEMOS - IU",
+      str_detect(partido, "ESQUERRA REPUBLICANA") ~ "ESQUERRA REPUBLICANA DE CATALUNYA",
       str_detect(partido, "BILDU") ~ "EH-BILDU",
       str_detect(partido, "MÁS PAÍS") ~ "MÁS PAÍS",
       str_detect(partido, "VOX") ~ "VOX",
@@ -97,7 +100,7 @@ election_data <- election_data |>
       partido_2 == "PARTIDO SOCIALISTA OBRERO ESPAÑOL" ~ "PSOE",
       partido_2 == "PARTIDO POPULAR" ~ "PP",
       partido_2 == "PARTIDO NACIONALISTA VASCO" ~ "EAJ-PNV",
-      partido_2 == "BLOQUE NACIONALISTA GALLEGO" ~ "BNG",
+      partido_2 == "BLOQUE NACIONALISTA GALEGO" ~ "BNG",
       partido_2 == "CONVERGÈNCIA I UNIÓ" ~ "CIU",
       partido_2 == "UNIDAS PODEMOS - IU" ~ "UP",
       partido_2 == "ESQUERRA REPUBLICANA DE CATALUNYA" ~ "ERC",
@@ -195,80 +198,3 @@ election_data <- election_data |>
 saveRDS(election_data, "data/processed/election_data.rds")
 saveRDS(surveys, "data/processed/surveys.rds")
 ```
-
-
-# POTENTIAL CARTOGRAM VISUALIZATION
-
-
-## Importing and joining province population data
-
-```{r}
-library(rvest)
-
-province_pop <- 'https://www.ign.es/web/ane-datos-geograficos/-/datos-geograficos/datosPoblacion?tipoBusqueda=provincias'
-
-province_pop <- read_html("https://www.ign.es/web/ane-datos-geograficos/-/datos-geograficos/datosPoblacion?tipoBusqueda=provincias") |>
-  html_elements("table") |>
-  _[[2]] |> #I select only the first table
-  html_table() |> 
-  janitor::clean_names() |> 
-  mutate(cod_ine = sprintf("%02d", as.numeric(cod_ine)), # Includes the "zeros"
-         poblacion = as.numeric(gsub("\\.", "", poblacion)),
-         superf_km2 = as.numeric(gsub("\\.", "", superf_km2))
-         ) |> 
-  rename(codigo_provincia = cod_ine)
-```
-
-## Filtering the data
-
-```{r}
-elections_1911 <- election_data |> 
-  filter(anno == 2019 & mes == 11) |> 
-  left_join(province_pop, by = "codigo_provincia") |> 
-  select(municipio, cod_mun, codigo_provincia, num_votos, siglas, partido, partido_2, provincia, poblacion)
-
-winners <- elections_1911 |> 
-  group_by(codigo_provincia, partido_2) |>  
-  summarise(votos_totales = sum(num_votos, na.rm = TRUE)) |> 
-  slice_max(votos_totales)
-```
-
-
-```{r}
-library(mapSpain)
-library(sf)
-library(cartogram)
-
-# Datos
-provinces <- esp_get_prov() |> 
-  mutate(provincia = prov.shortname.en) |> 
-  mutate(codigo_provincia = cpro) |> 
-  select(provincia, codigo_provincia)
-
-# Mapa base
-provinces_map <- ggplot(provinces) +
-  geom_sf()
-
-
-# Set Mercator projection
-
-prov_3857 <- st_transform(provinces, 3857)
-
-
-# Join dataframes
-
-
-```
-
-
-```{r}
-party_colors <- c(
-  "PSOE" = "#F93D46",
-  "PP" = "#41A4F5",
-  "VOX" = "#53FF53",
-  "ERC" = "#FF9E33",
-  "PNV" = "#04B82B",
-  "OTHER" = "#C0C0C0"
-)
-```
-
