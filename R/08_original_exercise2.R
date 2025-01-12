@@ -2,6 +2,10 @@
 library(tidyverse)
 library(magrittr)
 
+# ADD HERE THE SCREENSHOT OF THE STUDY: 
+# "Do Populist Parties Increase Voter Turnout? Evidence From Over 40 Years of 
+# Electoral History in 31 European Democracies"
+
 # load the data
 election_data <- readRDS("R/data/processed/election_data.rds")
 
