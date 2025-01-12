@@ -1,9 +1,122 @@
 ---
 title: "Data Programming Group Project"
-format: revealjs
+format: 
+  revealjs:
+    scrollable: true
+    toc: true
+    toc-location: right
+    toc-title: Index
+    echo: true
 ---
 
-# Overview
+# Libraries:
 
-## Exercises
+```{r}
+# Github
+library(gert) 
 
+# Data cleaning
+library(tidyverse)
+
+# Maps & Geospatial data
+library(mapSpain)
+library(sf)
+library(cartogram)
+
+# Font setting
+library(sysfonts) 
+library(showtext) 
+
+# Others
+library(stringi) 
+library(rvest)
+```
+
+------------------------------------------------------------------------
+
+Load Data files:
+
+```{r}
+election_data <- read_csv("data/raw/datos_elecciones_brutos.csv")
+cod_mun <- read_csv("data/raw/cod_mun.csv")
+surveys <- read_csv("data/raw/historical_surveys.csv")
+abbrev <- read_csv("data/raw/siglas.csv")
+```
+
+------------------------------------------------------------------------
+
+## Data cleaning
+
+```{r}
+
+```
+
+## Exercise 1
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Exercise 2
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Exercise 3
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Exercise 4
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Exercise 5
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Exercise 6
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Original exercise 1: Dorling cartogram
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Original exercise 2: Parliament plot (?)
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Original exercise 3: TBD
+
+```{r}
+
+```
