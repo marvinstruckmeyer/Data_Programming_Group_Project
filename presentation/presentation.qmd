@@ -37,10 +37,10 @@ library(rvest)
 Load Data files:
 
 ```{r}
-election_data <- read_csv("data/raw/datos_elecciones_brutos.csv")
-cod_mun <- read_csv("data/raw/cod_mun.csv")
-surveys <- read_csv("data/raw/historical_surveys.csv")
-abbrev <- read_csv("data/raw/siglas.csv")
+#| include: false
+
+election_data <- read_csv("data/processed/election_data.rds")
+surveys <- read_csv("data/processed/surveys.rds")
 ```
 
 ------------------------------------------------------------------------
