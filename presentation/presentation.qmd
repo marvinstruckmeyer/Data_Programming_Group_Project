@@ -507,7 +507,7 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
 ```{r}
 #| echo: false
 #| fig-width: 12
-#| fig-height: 8
+#| fig-height: 6
 
 pop_prov_cartog
 ```
