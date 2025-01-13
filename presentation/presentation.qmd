@@ -34,8 +34,8 @@ library(readxl)
 ```{r}
 #| include: false
 
-election_data <- read_csv("data/processed/election_data.rds")
-surveys <- read_csv("data/processed/surveys.rds")
+election_data <- readRDS("data/processed/election_data.rds")
+surveys <- readRDS("data/processed/surveys.rds")
 
 gdp_data <- read_excel("R/data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
 pop_data <- read_excel("R/data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
