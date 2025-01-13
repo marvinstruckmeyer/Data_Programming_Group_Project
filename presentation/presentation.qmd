@@ -148,6 +148,14 @@ winners_plot <- ggplot(winners, aes(x = anno, fill = siglas)) +
   labs(title = "Winning Parties in Municipalities",
        x = "Year", y = "Number of Municipalities", fill = "Party") +
   theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
 
 print(winners_plot)
 ```
@@ -161,8 +169,7 @@ regional_summary <- big_municipalities |>
   summarise(total_municipalities = n(), .groups = "drop") |> 
   arrange(desc(total_municipalities))
 
-
-ggplot(regional_summary, aes(x = anno, y = total_municipalities, color = partido_2)) +
+regional_plot <- ggplot(regional_summary, aes(x = anno, y = total_municipalities, color = partido_2)) +
   geom_line(linewidth = 1.2) + scale_fill_manual(values = c(scale_fill_manual(
     values = c( #E69F00",  # orange
       "#56B4E9",  # light blue
@@ -182,6 +189,16 @@ ggplot(regional_summary, aes(x = anno, y = total_municipalities, color = partido
   theme_minimal()+
   theme(axis.text.x = element_blank(), 
         axis.ticks.x = element_blank())
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(regional_plot)
 ```
 
 ------------------------------------------------------------------------
@@ -210,7 +227,7 @@ second_places <- ranked_parties |>
   filter(first_place %in% c("PSOE", "PP"))
 
 # Plot results
-ggplot(second_places, aes(x = first_place, fill = second_place)) +
+firstsecond_plot <- ggplot(second_places, aes(x = first_place, fill = second_place)) +
   geom_bar(position = "dodge") +
   scale_fill_manual(values = party_colors) +
   labs(
@@ -218,6 +235,16 @@ ggplot(second_places, aes(x = first_place, fill = second_place)) +
     x = "First-Place Party", y = "Number of Municipalities", fill = "Second-Place Party"
   ) +
   theme_presentation()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(firstsecond_plot)
 ```
 
 ------------------------------------------------------------------------
@@ -236,7 +263,7 @@ second_places_year <- ranked_parties |>
   filter(first_place %in% c("PSOE", "PP"))
 
 # Plot results: Grouped bar plot with years
-ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
+firstsecond_year_plot <- ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
   geom_bar(position = "dodge") +
   facet_wrap(~ first_place, scales = "free_y") +
   scale_fill_manual(values = party_colors) +
@@ -246,6 +273,16 @@ ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
     fill = "Second-Place Party"
   ) +
   theme_presentation()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(firstsecond_year_plot)
 ```
 
 ------------------------------------------------------------------------
@@ -276,13 +313,27 @@ area_summary <- election_data |>
   mutate(vote_share = total_votes / sum(total_votes))
 
 # Visualize voting patterns in rural vs. urban areas
-ggplot(area_summary, aes(x = siglas, y = vote_share, fill = area_type)) +
+votingpatterns_plot <- ggplot(area_summary, aes(x = siglas, y = vote_share, fill = area_type)) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = color_palette) +
   labs(title = "Vote Share by Party in Rural vs. Urban Areas",
        x = "Party", y = "Vote Share", fill = "Area Type") +
-  theme_minimal()
+  theme_presentation()
+```
 
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(votingpatterns_plot)
+```
+
+------------------------------------------------------------------------
+
+```{r}
 # Analyze relationship between census size and vote share
 census_vote <- election_data |> 
   group_by(censo, siglas) |> 
@@ -294,7 +345,6 @@ correlation_results <- census_vote |>
   summarise(correlation = cor(censo, total_votes, use = "complete.obs"))
 
 print(correlation_results)
-
 ```
 
 ------------------------------------------------------------------------
@@ -324,7 +374,7 @@ rural_party_summary <- rural_winners |>
 
 print(rural_party_summary)
 # 2. Visualize Trends with a bar chart (to visualize which parties dominate in rural areas):
-ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = siglas)) +
+ruralareas_parties_plot <- ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = siglas)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(values = party_colors) +
   labs(title = "Winning Parties in Rural Areas", x = "Party", y = "Number of Wins") +
@@ -334,10 +384,19 @@ ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = sigl
 ------------------------------------------------------------------------
 
 ```{r}
-## We could also perform a similar analysis for urban areas (area_type == "Urban")
-## and compare results to see if certain parties are more dominant in rural vs. urban regions.
-## or explore regional variations adding a regional breakdown (codigo_ccaa) to identify
-## if certain parties are more dominant in specific regions.
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(ruralareas_parties_plot)
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
 
 # !! Faceted Histograms
 # split the histogram into separate panels for each party using facet_wrap.
@@ -349,7 +408,14 @@ ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
        x = "Percentage of Votes",
        y = "Frequency") +
   theme_minimal()
+```
 
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
 
 ## !! Overlapping Line Charts (Frequency Polygons)
 ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
