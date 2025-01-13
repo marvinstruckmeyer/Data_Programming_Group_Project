@@ -11,6 +11,8 @@ format:
     echo: true
 ---
 
+
+
 ## Overview
 
 ::: {style="font-size: 0.9em;"}
@@ -38,6 +40,8 @@ format:
 ------------------------------------------------------------------------
 
 ## Libraries
+
+
 
 ```{r}
 # Github
@@ -74,9 +78,13 @@ gdp_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
 pop_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Set up
+
+
 
 ```{r}
 # define a custom theme
@@ -115,10 +123,14 @@ color_palette <-  c(
   "#117733")   # forest green
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Exercise 1
 Which party was the winner in the municipalities with more than 100,000 habitants (census) in each of the elections?
+
+
 ```{r}
 big_municipalities <- election_data|> 
   filter(censo > 100000)
@@ -139,7 +151,11 @@ winners_plot <- ggplot(winners, aes(x = anno, fill = siglas)) +
   theme_minimal()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -149,9 +165,13 @@ winners_plot <- ggplot(winners, aes(x = anno, fill = siglas)) +
 print(winners_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 Regional analysis
+
+
 ```{r}
 #regional analysis
 regional_summary <- big_municipalities |> 
@@ -170,7 +190,11 @@ regional_plot <- ggplot(regional_summary, aes(x = anno, y = total_municipalities
         axis.ticks.x = element_blank())
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -180,10 +204,14 @@ regional_plot <- ggplot(regional_summary, aes(x = anno, y = total_municipalities
 print(regional_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Exercise 2
 Which party was the second when the first was the PSOE? And when the first was the PP?
+
+
 ```{r}
 # Identify winners and second-place parties using siglas
 ranked_parties <- big_municipalities |> 
@@ -216,7 +244,11 @@ firstsecond_plot <- ggplot(second_places, aes(x = first_place, fill = second_pla
   theme_presentation()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -226,9 +258,13 @@ firstsecond_plot <- ggplot(second_places, aes(x = first_place, fill = second_pla
 print(firstsecond_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 Taking years into consideration:
+
+
 ```{r}
 # Summarize second-place parties over the years using siglas
 second_places_year <- ranked_parties |> 
@@ -254,7 +290,11 @@ firstsecond_year_plot <- ggplot(second_places_year, aes(x = factor(anno), fill =
   theme_presentation()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -264,10 +304,14 @@ firstsecond_year_plot <- ggplot(second_places_year, aes(x = factor(anno), fill =
 print(firstsecond_year_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Exercise 3
 ### Who benefits from low turnout?
+
+
 ```{r}
 # Filter data for the 2016 election year
 election_data <- election_data %>%
@@ -349,9 +393,13 @@ parliamentary_plot <- ggplot(seat_positions, aes(x = x, y = y, fill = partido_2)
   )
 ```
 
+
+
 ------------------------------------------------------------------------
 
 Voting Results
+
+
 ```{r}
 #| echo: false
 #| fig-width: 12
@@ -360,10 +408,14 @@ Voting Results
 parliamentary_plot
 
 ```
+
+
 ------------------------------------------------------------------------
 
 ## Exercise 4
 How to analyze the relationship between census and vote? Is it true that certain parties win in rural areas?
+
+
 ```{r}
 # Define rural and urban areas
 election_data <- election_data |> 
@@ -388,7 +440,11 @@ votingpatterns_plot <- ggplot(area_summary, aes(x = siglas, y = vote_share, fill
   theme_presentation()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -398,8 +454,12 @@ votingpatterns_plot <- ggplot(area_summary, aes(x = siglas, y = vote_share, fill
 print(votingpatterns_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 Relationship between census size and vote share
+
+
 ```{r}
 # Analyze relationship between census size and vote share
 census_vote <- election_data |> 
@@ -414,8 +474,12 @@ correlation_results <- census_vote |>
 print(correlation_results)
 ```
 
+
+
 ------------------------------------------------------------------------
 Winning Parties in Rural Areas
+
+
 ```{r}
 # Additional analysis: Top parties in rural areas
 rural_winners <- election_data |> 
@@ -439,7 +503,11 @@ ruralareas_parties_plot <- ggplot(rural_party_summary, aes(x = reorder(siglas, w
   theme_minimal()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -449,8 +517,12 @@ ruralareas_parties_plot <- ggplot(rural_party_summary, aes(x = reorder(siglas, w
 print(ruralareas_parties_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 Vote Percentage Distribution by Party in Rural Areas
+
+
 ```{r}
 # Faceted Histograms: split histogram into separate panels for each party.
 faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
@@ -463,7 +535,11 @@ faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = si
   theme_minimal()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -473,8 +549,12 @@ faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = si
 print(faceted_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 Vote Percentage Distribution by Party in Rural Areas
+
+
 ```{r}
 ## !! Overlapping Line Charts (Frequency Polygons)
 overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
@@ -487,7 +567,11 @@ overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color
   theme_minimal()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -497,11 +581,15 @@ overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color
 print(overlapping_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Exercise 5
 
 ### How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?
+
+
 
 ```{r}
 # Set target dates - Changed to November election
@@ -617,9 +705,13 @@ error_plot <- ggplot(
   )
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Polling Inacuracies 
+
+
 
 ```{r}
 #| echo: false
@@ -634,9 +726,13 @@ print("\nOverall Error Metrics:")
 print(error_metrics)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Exercise 6
+
+
 
 ```{r}
 election_data_clean <- election_data |>
@@ -704,7 +800,11 @@ pollster_plot <- ggplot(combined_pollsters, aes(x = reorder(pollster, desc(mean_
   coord_flip() 
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -714,15 +814,18 @@ pollster_plot <- ggplot(combined_pollsters, aes(x = reorder(pollster, desc(mean_
 print(pollster_plot)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Original exercise 1: Dorling cartogram
 
 ### First steps
 
+
+
 ```{r}
 # Filter election_data
-election_data <- readRDS("data/processed/election_data.rds")
 
 elections_1911 <- election_data |> 
   filter(anno == 2019 & mes == 11) |> 
@@ -758,9 +861,13 @@ pop_prov <- provinces |>
   left_join(winners_prov, by = "codigo_provincia")
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Create the cartogram
+
+
 
 ```{r}
 pop_prov_cartog <- cartogram_dorling(pop_prov, 
@@ -787,7 +894,11 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
                                     size = 12))
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -797,11 +908,27 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
 pop_prov_cartog
 ```
 
+
+
+------------------------------------------------------------------------
+
+## Original exercise 2: Parliament plot (?)
+
+
+
+```{r}
+
+```
+
+
+
 ------------------------------------------------------------------------
 
 ## Original exercise 2: Income and Populistic Voting
 
 ### First steps: Data download and wrangling
+
+
 
 ```{r}
 # source: REGDATA_v70_55_23.xlsx from :
@@ -858,9 +985,13 @@ print(paste("National average growth rate:", round(national_avg_growth, 2), "%")
 
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Next: Get VOX election results and join
+
+
 
 ```{r}
 election_data <- readRDS("data/processed/election_data.rds")
@@ -914,9 +1045,13 @@ print("\nCombined GDP growth and VOX support analysis:")
 print(combined_analysis)
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Analysis and scatterplot
+
+
 
 ```{r}
 # calculate correlation (excluding NA values)
@@ -943,7 +1078,11 @@ scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_per
     plot.title = element_text(face = "bold"))
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -952,6 +1091,8 @@ scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_per
 
 scatter_plot_1
 ```
+
+
 
 ------------------------------------------------------------------------
 
@@ -967,6 +1108,8 @@ and (3) studying electoral fragmentation.
 ------------------------------------------------------------------------
 
 ### Analysing how voter turnout relates to Vox's electoral success
+
+
 
 ```{r}
 # first, let's create municipality_summary for November 2019 (using both month and year)
@@ -1023,7 +1166,11 @@ turnout_vox_share_plot <- ggplot(final_analysis) +
   theme_presentation()
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -1033,9 +1180,13 @@ turnout_vox_share_plot <- ggplot(final_analysis) +
 turnout_vox_share_plot
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Visualising the geographic concentration in the support of Vox
+
+
 
 ```{r}
 regional_analysis <- election_data |> 
@@ -1107,7 +1258,11 @@ cartogram_vox_plot <- ggplot(cartogram_plot) +
       size = 12))
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -1117,9 +1272,13 @@ cartogram_vox_plot <- ggplot(cartogram_plot) +
 cartogram_vox_plot
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Studying electoral fragmentation
+
+
 
 ```{r}
 fragmentation_analysis <- election_data |> 
@@ -1170,7 +1329,11 @@ print("Correlation Analysis:")
 print(cor_analysis)
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -1179,7 +1342,11 @@ print(cor_analysis)
 fragmentation_analysis_1
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
@@ -1187,6 +1354,4 @@ fragmentation_analysis_1
 #| fig-height: 8
 fragmentation_analysis_2
 ```
-
-
 
