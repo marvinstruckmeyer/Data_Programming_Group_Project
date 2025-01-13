@@ -348,8 +348,6 @@ rural_party_summary <- rural_winners |>
   group_by(siglas) |> 
   summarise(wins = n(), .groups = "drop") |> 
   arrange(desc(wins))
-
-print(rural_party_summary)
 # 2. Visualize Trends with a bar chart (to visualize which parties dominate in rural areas):
 ruralareas_parties_plot <- ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = siglas)) +
   geom_bar(stat = "identity") +
