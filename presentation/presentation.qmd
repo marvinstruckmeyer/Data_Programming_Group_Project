@@ -271,12 +271,100 @@ print(firstsecond_year_plot)
 
 ------------------------------------------------------------------------
 
-## Exercise 3
-Who benefits from low turnout?
+## Question 3:
+### Who benefits from low turnout?
 ```{r}
+# Filter data for the 2016 election year
+election_data <- election_data %>%
+  filter(anno == 2016)  # Include only rows for 2016
 
+# Categorize turnout based on participacion_1
+election_data <- election_data %>%
+  mutate(
+    turnout_rate = participacion_1 / 100,
+    turnout_category = ifelse(turnout_rate < 0.5, "Low", "High")
+  )
+
+# Summarize votes under Low Turnout using partido_2
+low_turnout_data <- election_data %>%
+  filter(turnout_category == "Low") %>%
+  group_by(partido_2) %>%
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(percentage = total_votes / sum(total_votes) * 100)
+
+# Recode partido_2 to abbreviations for plotting
+low_turnout_data <- low_turnout_data %>%
+  mutate(
+    partido_2 = recode(partido_2,
+                       "CIUDADANOS" = "CS",
+                       "CONVERGÈNCIA I UNIÓ" = "CIU",
+                       "EH-BILDU" = "EH-BILDU",
+                       "ESQUERRA REPUBLICANA DE CATALUNYA" = "ERC",
+                       "PARTIDO POPULAR" = "PP",
+                       "PSOE" = "PSOE",
+                       "VOX" = "VOX",
+                       .default = "OTHER")
+  )
+
+# Set total seats and calculate distribution
+total_seats <- 350
+low_turnout_data <- low_turnout_data %>%
+  mutate(seats = round((total_votes / sum(total_votes)) * total_seats))
+
+# Expand data to one row per seat
+seat_positions <- low_turnout_data %>%
+  uncount(seats) %>%
+  mutate(seat_id = row_number())
+
+# Assign seats to rows and distribute radially by party
+num_rows <- 12  # Number of rows for the semicircle
+seat_positions <- seat_positions %>%
+  arrange(partido_2) %>%
+  mutate(
+    row = ((seat_id - 1) %% num_rows) + 1,
+    pos_in_row = ((seat_id - 1) %/% num_rows) + 1
+  )
+
+# Calculate x, y coordinates for radial alignment
+seat_positions <- seat_positions %>%
+  mutate(
+    row_radius = num_rows - row + 1,
+    angle = (pos_in_row - 0.5) / max(pos_in_row) * pi,
+    x = row_radius * cos(angle),
+    y = row_radius * sin(angle)
+  )
+
+# Plot the parliamentary diagram
+parliamentary_plot <- ggplot(seat_positions, aes(x = x, y = y, fill = partido_2)) +
+  geom_point(shape = 21, size = 3) +
+  scale_fill_manual(values = party_colors) +
+  coord_fixed() +
+  labs(
+    title = "Spanish Parliamentary Representation Under Low Turnout (2016)",
+    subtitle = paste("Proportional allocation of", total_seats, "seats"),
+    x = NULL,
+    y = NULL,
+    fill = "Party"
+  ) +
+  theme_void() +
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
 ```
 
+------------------------------------------------------------------------
+
+Voting Results
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+parliamentary_plot
+
+```
 ------------------------------------------------------------------------
 
 ## Exercise 4
@@ -416,10 +504,139 @@ print(overlapping_plot)
 
 ------------------------------------------------------------------------
 
-## Exercise 5
+## Question 5
+
+### How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?
 
 ```{r}
+# Set target dates - Changed to November election
+target_date_survey <- as.Date("2019-11-10")  # November election date
+target_date_election <- as.Date("2019-11-01")  # First of November
 
+# Create party name mapping with display names and colors
+party_mapping <- data.frame(
+  survey_name = c(
+    "CIUDADANOS",
+    "PARTIDO NACIONALISTA VASCO",
+    "PARTIDO POPULAR",
+    "PARTIDO SOCIALISTA OBRERO ESPAÑOL",
+    "UNIDAS PODEMOS - IU",
+    "ESQUERRA REPUBLICANA DE CATALUNYA",
+    "EH-BILDU",
+    "VOX",
+    "OTHER"
+  ),
+  election_name = c(
+    "CS",
+    "EAJ-PNV",
+    "PP",
+    "PSOE",
+    "UP",
+    "ERC",
+    "EH-BILDU",
+    "VOX",
+    "OTHER"
+  ),
+  display_name = c(
+    "CS",
+    "EAJ-PNV",
+    "PP",
+    "PSOE",
+    "UP",
+    "ERC",
+    "EH-BILDU",
+    "VOX",
+    "OTHER"
+  ),
+  party_color = c(
+    "#E9521D",  # CS
+    "#04B82B",  # EAJ-PNV
+    "#41A4F5",  # PP
+    "#F93D46",  # PSOE
+    "#7C316E",  # UP
+    "#FF9E33",  # ERC
+    "#03CFB5",  # EH-BILDU
+    "#53FF53",  # VOX
+    "#C0C0C0"   # OTHER
+  )
+)
+
+data_surveys_filtered <- surveys %>%
+  filter(date_elec == target_date_survey) %>%
+  group_by(party_name) %>%
+  summarise(
+    vote_intention = mean(vote_intention, na.rm = TRUE),
+    n_polls = n()
+  ) %>%
+  filter(!is.na(vote_intention)) %>%
+  mutate(vote_share_intention = vote_intention / sum(vote_intention) * 100) %>%
+  left_join(party_mapping, by = c("party_name" = "survey_name"))
+
+data_election <- election_data %>%
+  mutate(date_elec = as.Date(paste(anno, mes, "01", sep = "-")))
+data_election_filtered <- data_election %>%
+  filter(date_elec == target_date_election) %>%
+  group_by(siglas) %>%
+  summarise(
+    total_votes = sum(num_votos, na.rm = TRUE)
+  ) %>%
+  mutate(vote_share_actual = total_votes / sum(total_votes) * 100)
+
+# Merge datasets using the mapped names
+comparison_data <- data_surveys_filtered %>%
+  left_join(data_election_filtered, by = c("election_name" = "siglas"))
+
+# Calculate errors
+comparison_data <- comparison_data %>%
+  mutate(
+    absolute_error = vote_share_intention - vote_share_actual,
+    relative_error = (vote_share_intention - vote_share_actual) / vote_share_actual * 100
+  )
+
+# Calculate overall error metrics
+error_metrics <- comparison_data %>%
+  filter(!is.na(absolute_error)) %>%
+  summarise(
+    mae = mean(abs(absolute_error)),
+    rmse = sqrt(mean(absolute_error^2)),
+    mean_error = mean(absolute_error)
+  )
+
+error_plot <- ggplot(
+  comparison_data %>% filter(!is.na(absolute_error)), 
+  aes(x = reorder(display_name, -vote_share_actual))
+) +
+  geom_col(aes(y = absolute_error), fill = comparison_data$party_color[!is.na(comparison_data$absolute_error)]) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "Polling Error by Party - November 2019 Election",
+    subtitle = paste("Mean Absolute Error:", round(error_metrics$mae, 2), "%"),
+    x = "Party",
+    y = "Error in Vote Share (Prediction - Actual) %"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray95")
+  )
+```
+
+------------------------------------------------------------------------
+
+### Polling Inacuracies 
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(error_plot)
+print("\nDetailed Error Analysis:")
+print(comparison_data %>% 
+        select(display_name, vote_share_intention, vote_share_actual, absolute_error, relative_error))
+print("\nOverall Error Metrics:")
+print(error_metrics)
 ```
 
 ------------------------------------------------------------------------
