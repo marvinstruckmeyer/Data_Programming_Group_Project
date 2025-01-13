@@ -334,6 +334,14 @@ print(correlation_results)
 ------------------------------------------------------------------------
 
 ```{r}
+# Additional analysis: Top parties in rural areas
+rural_winners <- election_data |> 
+  filter(area_type == "Rural") |> 
+  group_by(codigo_municipio, anno, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_municipio, anno) |> 
+  slice_max(total_votes, n = 1)
+
 # We can take the analysis further and:
 # 1. aggregate the data to count how often each party wins in rural areas:
 rural_party_summary <- rural_winners |> 
