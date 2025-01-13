@@ -134,7 +134,63 @@ color_palette <-  c(
 ## Exercise 2
 
 ```{r}
+# Identify winners and second-place parties using siglas
+ranked_parties <- big_municipalities |> 
+  group_by(codigo_municipio, anno, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_municipio, anno) |> 
+  arrange(desc(total_votes)) |> 
+  mutate(rank = row_number()) |> 
+  ungroup()
 
+# Filter for cases where the first-place party is PSOE or PP
+second_places <- ranked_parties |> 
+  filter(rank <= 2) |> 
+  group_by(codigo_municipio, anno) |> 
+  summarise(
+    first_place = siglas[rank == 1],
+    second_place = siglas[rank == 2],
+    .groups = "drop"
+  ) |> 
+  filter(first_place %in% c("PSOE", "PP"))
+
+# Plot results
+ggplot(second_places, aes(x = first_place, fill = second_place)) +
+  geom_bar(position = "dodge") +
+  scale_fill_manual(values = party_colors) +
+  labs(
+    title = "Second-Place Parties When First is PSOE or PP",
+    x = "First-Place Party", y = "Number of Municipalities", fill = "Second-Place Party"
+  ) +
+  theme_presentation()
+```
+
+------------------------------------------------------------------------
+
+Taking years into consideration:
+```{r}
+# Summarize second-place parties over the years using siglas
+second_places_year <- ranked_parties |> 
+  filter(rank <= 2) |> 
+  group_by(codigo_municipio, anno) |> 
+  summarise(
+    first_place = siglas[rank == 1],
+    second_place = siglas[rank == 2],
+    .groups = "drop"
+  ) |> 
+  filter(first_place %in% c("PSOE", "PP"))
+
+# Plot results: Grouped bar plot with years
+ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~ first_place, scales = "free_y") +
+  scale_fill_manual(values = party_colors) +
+  labs(
+    title = "Second-Place Parties Over Time When First is PSOE or PP",
+    x = "Year of Election", y = "Number of Municipalities",
+    fill = "Second-Place Party"
+  ) +
+  theme_presentation()
 ```
 
 ------------------------------------------------------------------------
@@ -148,9 +204,107 @@ color_palette <-  c(
 ------------------------------------------------------------------------
 
 ## Exercise 4
+How to analyze the relationship between census and vote? Is it true that certain parties win in rural areas?
+```{r}
+# Define rural and urban areas
+election_data <- election_data |> 
+  mutate(area_type = case_when(
+    censo < 10000 ~ "Rural",
+    censo >= 10000 ~ "Urban"
+  ))
+
+# Summarize votes by area type and party
+area_summary <- election_data |> 
+  group_by(area_type, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE),
+            total_municipalities = n(), .groups = "drop") |> 
+  mutate(vote_share = total_votes / sum(total_votes))
+
+# Visualize voting patterns in rural vs. urban areas
+ggplot(area_summary, aes(x = siglas, y = vote_share, fill = area_type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = color_palette) +
+  labs(title = "Vote Share by Party in Rural vs. Urban Areas",
+       x = "Party", y = "Vote Share", fill = "Area Type") +
+  theme_minimal()
+
+# Analyze relationship between census size and vote share
+census_vote <- election_data |> 
+  group_by(censo, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop")
+
+# Correlation analysis
+correlation_results <- census_vote |> 
+  group_by(siglas) |> 
+  summarise(correlation = cor(censo, total_votes, use = "complete.obs"))
+
+print(correlation_results)
+
+```
+
+------------------------------------------------------------------------
 
 ```{r}
+# Additional analysis: Top parties in rural areas
+rural_winners <- election_data |> 
+  filter(area_type == "Rural") |> 
+  group_by(codigo_municipio, anno, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_municipio, anno) |> 
+  slice_max(total_votes, n = 1)
 
+print(rural_winners)
+# a table listing the most successful parties in rural municipalities
+```
+
+------------------------------------------------------------------------
+
+```{r}
+# We can take the analysis further and:
+# 1. aggregate the data to count how often each party wins in rural areas:
+rural_party_summary <- rural_winners |> 
+  group_by(siglas) |> 
+  summarise(wins = n(), .groups = "drop") |> 
+  arrange(desc(wins))
+
+print(rural_party_summary)
+# 2. Visualize Trends with a bar chart (to visualize which parties dominate in rural areas):
+ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = siglas)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = party_colors) +
+  labs(title = "Winning Parties in Rural Areas", x = "Party", y = "Number of Wins") +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+## We could also perform a similar analysis for urban areas (area_type == "Urban")
+## and compare results to see if certain parties are more dominant in rural vs. urban regions.
+## or explore regional variations adding a regional breakdown (codigo_ccaa) to identify
+## if certain parties are more dominant in specific regions.
+
+# !! Faceted Histograms
+# split the histogram into separate panels for each party using facet_wrap.
+ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
+  geom_histogram(binwidth = 3, color = "white") +
+  facet_wrap(~ siglas, scales = "free_y") +
+  scale_fill_manual(values = party_colors) +
+  labs(title = "Vote Percentage Distribution by Party in Rural Areas",
+       x = "Percentage of Votes",
+       y = "Frequency") +
+  theme_minimal()
+
+
+## !! Overlapping Line Charts (Frequency Polygons)
+ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
+  geom_freqpoly(binwidth = 2, size = 1) +
+  scale_color_manual(values = party_colors) +
+  labs(title = "Vote Percentage Distribution by Party in Rural Areas",
+       x = "Percentage of Votes",
+       y = "Frequency",
+       color = "Party") +
+  theme_minimal()
 ```
 
 ------------------------------------------------------------------------
@@ -574,7 +728,7 @@ cartogram_vox_plot <- ggplot(cartogram_plot) +
 #| fig-width: 12
 #| fig-height: 8
 
-cartorgram_vox_plot
+cartogram_vox_plot
 ```
 
 ------------------------------------------------------------------------

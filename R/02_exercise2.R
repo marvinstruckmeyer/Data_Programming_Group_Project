@@ -43,12 +43,6 @@ sysfonts::font_add_google("Roboto Condensed", family = "rob_cond")
 showtext::showtext_auto()
 
 # Plot results
-ggplot(second_places, aes(x = first_place, fill = second_place)) +
-  geom_bar(position = "dodge") +
-  scale_fill_manual(values = party_colors) +
-  labs(title = "Second-Place Parties When First is PSOE or PP",
-       x = "First-Place Party", y = "Number of Municipalities", fill = "Second-Place Party") +
-  theme_minimal()
 # the bar chart shows the distribution of second-place parties when the first is PSOE or PP
 ggplot(second_places, aes(x = first_place, fill = second_place)) +
   geom_bar(position = "dodge") +
