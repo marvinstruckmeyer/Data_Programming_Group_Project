@@ -31,7 +31,7 @@ format:
 
 -   Original Exercise 2: Parliamentary plot
 
--   Original Exercise 2: Income and Populistic Voting
+-   Original Exercise 3: Income and Populistic Voting
 
 :::
 
@@ -261,7 +261,7 @@ pop_prov_cartog
 
 ------------------------------------------------------------------------
 
-## Original exercise 3: Do economically left behind provinces vote more populistic?
+## Original exercise 3: Income and Populistic Voting
 
 ### First steps: Data download and wrangling
 
@@ -322,7 +322,7 @@ print(paste("National average growth rate:", round(national_avg_growth, 2), "%")
 
 ------------------------------------------------------------------------
 
-### Next: 
+### Next: Get VOX election results and join
 
 ```{r}
 # calculate VOX results by CCAA for November 2019
@@ -376,7 +376,7 @@ print(combined_analysis)
 
 ------------------------------------------------------------------------
 
-### Now: 
+### Analysis and scatterplot
 
 ```{r}
 # calculate correlation (excluding NA values)
