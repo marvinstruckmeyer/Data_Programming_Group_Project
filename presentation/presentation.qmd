@@ -405,8 +405,6 @@ print(votingpatterns_plot)
 ### Relationship between census size and vote share
 
 ```{r}
-election_data <- readRDS("data/processed/election_data.rds")
-
 # Analyze relationship between census size and vote share
 census_vote <- election_data |> 
   group_by(censo, siglas) |> 
@@ -634,16 +632,21 @@ error_plot <- ggplot(
 ### Polling Inacuracies 
 
 ```{r}
-#| echo: false
-#| fig-width: 12
-#| fig-height: 8
-
-print(error_plot)
 print("\nDetailed Error Analysis:")
 print(comparison_data %>% 
         select(display_name, vote_share_intention, vote_share_actual, absolute_error, relative_error))
 print("\nOverall Error Metrics:")
 print(error_metrics)
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(error_plot)
 ```
 
 ------------------------------------------------------------------------
@@ -811,7 +814,7 @@ pop_prov_cartog
 
 ------------------------------------------------------------------------
 
-## Original exercise 2: Income and Populistic Voting
+## Original exercise 2: Income and Populist Voting
 
 ### First steps: Data download and wrangling
 
