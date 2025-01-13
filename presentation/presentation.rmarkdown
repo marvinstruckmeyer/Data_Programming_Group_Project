@@ -11,6 +11,8 @@ format:
     echo: true
 ---
 
+
+
 ## Overview
 
 ::: {style="font-size: 0.9em;"}
@@ -38,6 +40,8 @@ format:
 ------------------------------------------------------------------------
 
 ## Libraries
+
+
 
 ```{r}
 # Github
@@ -74,9 +78,13 @@ gdp_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
 pop_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Set up
+
+
 
 ```{r}
 # define a custom theme
@@ -115,65 +123,97 @@ color_palette <-  c(
   "#117733")   # forest green
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ## Data cleaning
 
+
+
 ```{r}
 
 ```
+
+
 
 ## Exercise 1
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Exercise 2
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Exercise 3
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Exercise 4
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Exercise 5
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Exercise 6
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Original exercise 1: Dorling cartogram
 
 ### First steps
+
+
 
 ```{r}
 # Filter election_data
@@ -212,9 +252,13 @@ pop_prov <- provinces |>
   left_join(winners_prov, by = "codigo_provincia")
 ```
 
+
+
 ------------------------------------------------------------------------
 
 ### Create the cartogram
+
+
 
 ```{r}
 pop_prov_cartog <- cartogram_dorling(pop_prov, 
@@ -241,34 +285,44 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
                                     size = 12))
 ```
 
+
+
 ------------------------------------------------------------------------
+
+
 
 ```{r}
 #| echo: false
 #| fig-width: 12
 #| fig-height: 6
 
-pop_prov_cartog
+#pop_prov_cartog
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Original exercise 2: Parliament plot (?)
 
+
+
 ```{r}
 
 ```
+
+
 
 ------------------------------------------------------------------------
 
 ## Original exercise 3: Do economically left behind provinces vote more populistic?
 
-### First steps: Data download and wrangling
+
 
 ```{r}
 # source: REGDATA_v70_55_23.xlsx from :
-# https://www.bbvaresearch.com/en/publicaciones/spain-long-series-of-regional-
-# economic-and-demographic-aggregates-2023-update/
+# https://www.bbvaresearch.com/en/publicaciones/spain-long-series-of-regional-economic-and-demographic-aggregates-2023-update/
+
 
 # convert both datasets to long format
 gdp_long <- gdp_data |> 
@@ -318,13 +372,6 @@ print(growth_rates)
 
 print(paste("National average growth rate:", round(national_avg_growth, 2), "%"))
 
-```
-
-------------------------------------------------------------------------
-
-### Next: 
-
-```{r}
 # calculate VOX results by CCAA for November 2019
 vox_results_2019 <- election_data |> 
   filter(anno == 2019, mes == 11) |> 
@@ -372,13 +419,7 @@ combined_analysis <- growth_rates |>
 # print combined results
 print("\nCombined GDP growth and VOX support analysis:")
 print(combined_analysis)
-```
 
-------------------------------------------------------------------------
-
-### Now: 
-
-```{r}
 # calculate correlation (excluding NA values)
 correlation <- cor(combined_analysis$relative_growth, 
                    combined_analysis$vox_percentage,
@@ -386,7 +427,7 @@ correlation <- cor(combined_analysis$relative_growth,
 print(paste("\nCorrelation between relative GDP growth and VOX support:", round(correlation, 3)))
 
 # create scatter plot
-scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_percentage)) +
+ggplot(combined_analysis, aes(x = relative_growth, y = vox_percentage)) +
   geom_point(aes(color = growth_category), size = 3) +
   geom_text(aes(label = region), vjust = -0.5, size = 3) +
   geom_smooth(method = "lm", color = "red", linetype = "dashed", se = FALSE) +
@@ -402,16 +443,4 @@ scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_per
     legend.position = "bottom",
     plot.title = element_text(face = "bold"))
 ```
-
-------------------------------------------------------------------------
-
-```{r}
-#| echo: false
-#| fig-width: 12
-#| fig-height: 6
-
-scatter_plot_1
-```
-
-
 
