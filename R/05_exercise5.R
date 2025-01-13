@@ -131,11 +131,3 @@ print(comparison_data %>%
 print("\nOverall Error Metrics:")
 print(error_metrics)
 
-install.packages("gert")
-
-library(gert)
-
-
-gert::git_pull()
-
-gert::git_add("R/05_exercise5.R")
