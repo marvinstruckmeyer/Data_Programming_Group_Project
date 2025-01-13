@@ -167,14 +167,6 @@ color_palette <-  c(
 
 ## Original exercise 1: Dorling cartogram
 
-### Important libraries
-
--   `sf`
-
--   `mapSpain`
-
--   `cartogram`
-
 ```{r}
 #| include: false
 
@@ -182,8 +174,6 @@ library(mapSpain)
 library(sf)
 library(cartogram)
 ```
-
-------------------------------------------------------------------------
 
 ### First steps
 
