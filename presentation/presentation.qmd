@@ -2,6 +2,7 @@
 title: "Data Programming Group Project"
 format: 
   revealjs:
+    theme: solarized
     scrollable: true
     toc: true
     toc-location: right
@@ -9,7 +10,7 @@ format:
     echo: true
 ---
 
-# Libraries:
+## Libraries:
 
 ```{r}
 # Github
@@ -34,10 +35,6 @@ library(rvest)
 # download Excel data
 library(readxl)
 ```
-
-------------------------------------------------------------------------
-
-Load Data files:
 
 ```{r}
 #| include: false
