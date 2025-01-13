@@ -50,11 +50,17 @@ library(tidyverse)
 library(sysfonts) 
 library(showtext) 
 
+# Maps & Geospatial data
+
+library(mapSpain)
+library(sf)
+library(cartogram)
+
 # Others
 library(stringi) 
 library(rvest)
 
-# download Excel data
+# Download Excel data
 library(readxl)
 ```
 
@@ -166,24 +172,6 @@ color_palette <-  c(
 ------------------------------------------------------------------------
 
 ## Original exercise 1: Dorling cartogram
-
-### Important libraries
-
--   `sf`
-
--   `mapSpain`
-
--   `cartogram`
-
-```{r}
-#| include: false
-
-library(mapSpain)
-library(sf)
-library(cartogram)
-```
-
-------------------------------------------------------------------------
 
 ### First steps
 
