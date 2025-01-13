@@ -157,6 +157,7 @@ print(winners_plot)
 
 ------------------------------------------------------------------------
 
+Regional analysis
 ```{r}
 #regional analysis
 regional_summary <- big_municipalities |> 
@@ -271,7 +272,7 @@ print(firstsecond_year_plot)
 
 ------------------------------------------------------------------------
 
-## Question 3:
+## Exercise 3
 ### Who benefits from low turnout?
 ```{r}
 # Filter data for the 2016 election year
@@ -404,7 +405,7 @@ print(votingpatterns_plot)
 ```
 
 ------------------------------------------------------------------------
-
+Relationship between census size and vote share
 ```{r}
 # Analyze relationship between census size and vote share
 census_vote <- election_data |> 
@@ -420,7 +421,7 @@ print(correlation_results)
 ```
 
 ------------------------------------------------------------------------
-
+Winning Parties in Rural Areas
 ```{r}
 # Additional analysis: Top parties in rural areas
 rural_winners <- election_data |> 
@@ -455,7 +456,7 @@ print(ruralareas_parties_plot)
 ```
 
 ------------------------------------------------------------------------
-
+Vote Percentage Distribution by Party in Rural Areas
 ```{r}
 # Faceted Histograms: split histogram into separate panels for each party.
 faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
@@ -479,7 +480,7 @@ print(faceted_plot)
 ```
 
 ------------------------------------------------------------------------
-
+Vote Percentage Distribution by Party in Rural Areas
 ```{r}
 ## !! Overlapping Line Charts (Frequency Polygons)
 overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
@@ -504,7 +505,7 @@ print(overlapping_plot)
 
 ------------------------------------------------------------------------
 
-## Question 5
+## Exercise 5
 
 ### How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?
 
@@ -875,6 +876,8 @@ print(paste("National average growth rate:", round(national_avg_growth, 2), "%")
 ### Next: Get VOX election results and join
 
 ```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
 # calculate VOX results by CCAA for November 2019
 vox_results_2019 <- election_data |> 
   filter(anno == 2019, mes == 11) |> 
