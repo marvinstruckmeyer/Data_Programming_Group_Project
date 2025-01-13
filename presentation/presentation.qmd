@@ -1,16 +1,43 @@
 ---
 title: "Data Programming Group Project"
+author: "Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Estela Moral"
 format: 
   revealjs:
     theme: solarized
     scrollable: true
-    toc: true
+    toc: false
     toc-location: right
     toc-title: Index
     echo: true
 ---
 
-## Libraries:
+## Overview
+
+::: {style="font-size: 0.9em;"}
+
+-   Exercise 1
+
+-   Exercise 2
+
+-   Exercise 3
+
+-   Exercise 4
+
+-   Exercise 5
+
+-   Exercise 6
+
+-   Original Exercise 1: Dorling Cartogram
+
+-   Original Exercise 2: Parliamentary plot
+
+-   Original Exercise 2:
+
+:::
+
+------------------------------------------------------------------------
+
+## Libraries
 
 ```{r}
 # Github
@@ -37,9 +64,13 @@ library(readxl)
 election_data <- readRDS("data/processed/election_data.rds")
 surveys <- readRDS("data/processed/surveys.rds")
 
-gdp_data <- read_excel("R/data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
-pop_data <- read_excel("R/data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
+gdp_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
+pop_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
 ```
+
+------------------------------------------------------------------------
+
+## Set up
 
 ```{r}
 # define a custom theme
@@ -233,9 +264,6 @@ pop_prov_cartog
 ```
 
 ------------------------------------------------------------------------
-
-
-
 
 ## Original exercise 2: Parliament plot (?)
 
