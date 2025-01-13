@@ -167,7 +167,7 @@ ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = sigl
 # !! Faceted Histograms
 # split the histogram into separate panels for each party using facet_wrap.
 ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
-  geom_histogram(binwidth = 2, color = "white") +
+  geom_histogram(binwidth = 3, color = "white") +
   facet_wrap(~ siglas, scales = "free_y") +
   scale_fill_manual(values = party_colors) +
   labs(title = "Vote Percentage Distribution by Party in Rural Areas",
