@@ -246,7 +246,7 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
 ```{r}
 #| echo: false
 #| fig-width: 12
-#| fig-height: 6
+#| fig-height: 8
 
 pop_prov_cartog
 ```
@@ -408,7 +408,7 @@ scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_per
 ```{r}
 #| echo: false
 #| fig-width: 12
-#| fig-height: 6
+#| fig-height: 8
 
 scatter_plot_1
 ```
