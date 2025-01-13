@@ -36,9 +36,25 @@ party_colors <- c(
   "OTHER" = "#C0C0C0"
 )
 
+# palette
+color_palette <-  c(
+  "#E69F00",  # orange
+  "#56B4E9",  # light blue
+  "#009E73",  # green
+  "#F0E442",  # yellow
+  "#0072B2",  # dark blue
+  "#D55E00",  # red
+  "#CC79A7",  # pink
+  "#999999",  # grey
+  "#44AA99",  # teal
+  "#332288",  # indigo
+  "#AA4499",  # purple
+  "#117733")   # forest green
+
 # Visualize voting patterns in rural vs. urban areas
 ggplot(area_summary, aes(x = siglas, y = vote_share, fill = area_type)) +
   geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = color_palette) +
   labs(title = "Vote Share by Party in Rural vs. Urban Areas",
        x = "Party", y = "Vote Share", fill = "Area Type") +
   theme_minimal()

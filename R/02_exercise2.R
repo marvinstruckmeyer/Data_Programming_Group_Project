@@ -29,9 +29,25 @@ second_places <- ranked_parties |>
 # View results
 print(second_places)
 
+# palette
+color_palette <-  c(
+  "#E69F00",  # orange
+  "#56B4E9",  # light blue
+  "#009E73",  # green
+  "#F0E442",  # yellow
+  "#0072B2",  # dark blue
+  "#D55E00",  # red
+  "#CC79A7",  # pink
+  "#999999",  # grey
+  "#44AA99",  # teal
+  "#332288",  # indigo
+  "#AA4499",  # purple
+  "#117733")   # forest green
+
 # Plot results
 ggplot(second_places, aes(x = first_place, fill = second_place)) +
   geom_bar(position = "dodge") +
+  scale_fill_manual(values = color_palette) +
   labs(title = "Second-Place Parties When First is PSOE or PP",
        x = "First-Place Party", y = "Number of Municipalities", fill = "Second-Place Party") +
   theme_minimal()
