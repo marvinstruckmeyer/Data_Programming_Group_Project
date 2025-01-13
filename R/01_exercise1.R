@@ -73,5 +73,6 @@ ggplot(regional_summary, aes(x = anno, y = total_municipalities, color = partido
 
 gert::git_add(".")
 
+gert::git_commit("hi")
 
 gert::git_push()
