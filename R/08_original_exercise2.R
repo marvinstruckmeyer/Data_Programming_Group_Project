@@ -170,11 +170,10 @@ ggplot(fragmentation_analysis) +
     title = "VOX Support vs Traditional Party Support",
     subtitle = "November 2019 Elections",
     x = "Combined PP + PSOE Vote Share (%)",
-    y = "VOX Vote Share (%)"
-  ) +
+    y = "VOX Vote Share (%)") +
   theme_minimal()
 
-# Calculate correlations
+# calculate correlations
 cor_analysis <- fragmentation_analysis |> 
   summarise(
     cor_fragmentation = cor(effective_parties, vox_share, use = "complete.obs"),
