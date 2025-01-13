@@ -43,12 +43,6 @@ sysfonts::font_add_google("Roboto Condensed", family = "rob_cond")
 showtext::showtext_auto()
 
 # Plot results
-ggplot(second_places, aes(x = first_place, fill = second_place)) +
-  geom_bar(position = "dodge") +
-  scale_fill_manual(values = party_colors) +
-  labs(title = "Second-Place Parties When First is PSOE or PP",
-       x = "First-Place Party", y = "Number of Municipalities", fill = "Second-Place Party") +
-  theme_minimal()
 # the bar chart shows the distribution of second-place parties when the first is PSOE or PP
 ggplot(second_places, aes(x = first_place, fill = second_place)) +
   geom_bar(position = "dodge") +
@@ -87,11 +81,8 @@ ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
     x = "Year of Election", y = "Number of Municipalities",
     fill = "Second-Place Party"
   ) +
-  theme_minimal() +
-  theme(
-    text = element_text(family = "RobotoCondensed"),  # Use Roboto Condensed font
-    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better readability
-  )
+  theme_minimal()
+ )
 
 ## otherwise, but I don't like it:
 ## Plot results: Stacked bar plot with years

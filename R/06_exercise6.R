@@ -40,8 +40,6 @@ surveys_clean <- surveys_clean |>
 merged_data <- election_data_clean|>
   inner_join(surveys_clean, by = c("partido_2" = "party_name"),relationship = "many-to-many")
 
-merged_data<- merged_data |>
-  inner_join(election_data_grouped, by = "partido_2")
 
 
 merged_data <- merged_data |>

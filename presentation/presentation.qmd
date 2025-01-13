@@ -117,48 +117,536 @@ color_palette <-  c(
 
 ------------------------------------------------------------------------
 
-## Data cleaning
-
+## Exercise 1
+Which party was the winner in the municipalities with more than 100,000 habitants (census) in each of the elections?
 ```{r}
+big_municipalities <- election_data|> 
+  filter(censo > 100000)
 
+
+winners <- big_municipalities |> 
+  group_by(codigo_municipio, anno, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") %>%
+  group_by(codigo_municipio, anno) |> 
+  slice_max(total_votes, n = 1)  
+
+
+winners_plot <- ggplot(winners, aes(x = anno, fill = siglas)) +
+  geom_bar(position = "dodge") + scale_fill_manual(
+    values = party_colors)+
+  labs(title = "Winning Parties in Municipalities",
+       x = "Year", y = "Number of Municipalities", fill = "Party") +
+  theme_minimal()
 ```
 
-## Exercise 1
+------------------------------------------------------------------------
 
 ```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
 
+print(winners_plot)
+```
+
+------------------------------------------------------------------------
+
+Regional analysis
+```{r}
+#regional analysis
+regional_summary <- big_municipalities |> 
+  group_by(codigo_ccaa, partido_2, anno) |> 
+  summarise(total_municipalities = n(), .groups = "drop") |> 
+  arrange(desc(total_municipalities))
+
+regional_plot <- ggplot(regional_summary, aes(x = anno, y = total_municipalities, color = partido_2)) +
+  geom_line(linewidth = 1.2) + scale_fill_manual(values = c(scale_fill_manual(
+    values = color_palette)))+
+  facet_wrap(~codigo_ccaa) + 
+  labs(title = "Regional Performance of Parties Over Time",
+       x = "Year", y = "Number of Municipalities", color = "Party") +
+  theme_minimal()+
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(regional_plot)
 ```
 
 ------------------------------------------------------------------------
 
 ## Exercise 2
+Which party was the second when the first was the PSOE? And when the first was the PP?
+```{r}
+# Identify winners and second-place parties using siglas
+ranked_parties <- big_municipalities |> 
+  group_by(codigo_municipio, anno, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_municipio, anno) |> 
+  arrange(desc(total_votes)) |> 
+  mutate(rank = row_number()) |> 
+  ungroup()
+
+# Filter for cases where the first-place party is PSOE or PP
+second_places <- ranked_parties |> 
+  filter(rank <= 2) |> 
+  group_by(codigo_municipio, anno) |> 
+  summarise(
+    first_place = siglas[rank == 1],
+    second_place = siglas[rank == 2],
+    .groups = "drop"
+  ) |> 
+  filter(first_place %in% c("PSOE", "PP"))
+
+# Plot results
+firstsecond_plot <- ggplot(second_places, aes(x = first_place, fill = second_place)) +
+  geom_bar(position = "dodge") +
+  scale_fill_manual(values = party_colors) +
+  labs(
+    title = "Second-Place Parties When First is PSOE or PP",
+    x = "First-Place Party", y = "Number of Municipalities", fill = "Second-Place Party"
+  ) +
+  theme_presentation()
+```
+
+------------------------------------------------------------------------
 
 ```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
 
+print(firstsecond_plot)
+```
+
+------------------------------------------------------------------------
+
+Taking years into consideration:
+```{r}
+# Summarize second-place parties over the years using siglas
+second_places_year <- ranked_parties |> 
+  filter(rank <= 2) |> 
+  group_by(codigo_municipio, anno) |> 
+  summarise(
+    first_place = siglas[rank == 1],
+    second_place = siglas[rank == 2],
+    .groups = "drop"
+  ) |> 
+  filter(first_place %in% c("PSOE", "PP"))
+
+# Plot results: Grouped bar plot with years
+firstsecond_year_plot <- ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~ first_place, scales = "free_y") +
+  scale_fill_manual(values = party_colors) +
+  labs(
+    title = "Second-Place Parties Over Time When First is PSOE or PP",
+    x = "Year of Election", y = "Number of Municipalities",
+    fill = "Second-Place Party"
+  ) +
+  theme_presentation()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(firstsecond_year_plot)
 ```
 
 ------------------------------------------------------------------------
 
 ## Exercise 3
-
+### Who benefits from low turnout?
 ```{r}
+# Filter data for the 2016 election year
+election_data <- election_data %>%
+  filter(anno == 2016)  # Include only rows for 2016
 
+# Categorize turnout based on participacion_1
+election_data <- election_data %>%
+  mutate(
+    turnout_rate = participacion_1 / 100,
+    turnout_category = ifelse(turnout_rate < 0.5, "Low", "High")
+  )
+
+# Summarize votes under Low Turnout using partido_2
+low_turnout_data <- election_data %>%
+  filter(turnout_category == "Low") %>%
+  group_by(partido_2) %>%
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(percentage = total_votes / sum(total_votes) * 100)
+
+# Recode partido_2 to abbreviations for plotting
+low_turnout_data <- low_turnout_data %>%
+  mutate(
+    partido_2 = recode(partido_2,
+                       "CIUDADANOS" = "CS",
+                       "CONVERGÈNCIA I UNIÓ" = "CIU",
+                       "EH-BILDU" = "EH-BILDU",
+                       "ESQUERRA REPUBLICANA DE CATALUNYA" = "ERC",
+                       "PARTIDO POPULAR" = "PP",
+                       "PSOE" = "PSOE",
+                       "VOX" = "VOX",
+                       .default = "OTHER")
+  )
+
+# Set total seats and calculate distribution
+total_seats <- 350
+low_turnout_data <- low_turnout_data %>%
+  mutate(seats = round((total_votes / sum(total_votes)) * total_seats))
+
+# Expand data to one row per seat
+seat_positions <- low_turnout_data %>%
+  uncount(seats) %>%
+  mutate(seat_id = row_number())
+
+# Assign seats to rows and distribute radially by party
+num_rows <- 12  # Number of rows for the semicircle
+seat_positions <- seat_positions %>%
+  arrange(partido_2) %>%
+  mutate(
+    row = ((seat_id - 1) %% num_rows) + 1,
+    pos_in_row = ((seat_id - 1) %/% num_rows) + 1
+  )
+
+# Calculate x, y coordinates for radial alignment
+seat_positions <- seat_positions %>%
+  mutate(
+    row_radius = num_rows - row + 1,
+    angle = (pos_in_row - 0.5) / max(pos_in_row) * pi,
+    x = row_radius * cos(angle),
+    y = row_radius * sin(angle)
+  )
+
+# Plot the parliamentary diagram
+parliamentary_plot <- ggplot(seat_positions, aes(x = x, y = y, fill = partido_2)) +
+  geom_point(shape = 21, size = 3) +
+  scale_fill_manual(values = party_colors) +
+  coord_fixed() +
+  labs(
+    title = "Spanish Parliamentary Representation Under Low Turnout (2016)",
+    subtitle = paste("Proportional allocation of", total_seats, "seats"),
+    x = NULL,
+    y = NULL,
+    fill = "Party"
+  ) +
+  theme_void() +
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
 ```
 
 ------------------------------------------------------------------------
 
+Voting Results
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+parliamentary_plot
+
+```
+------------------------------------------------------------------------
+
 ## Exercise 4
+How to analyze the relationship between census and vote? Is it true that certain parties win in rural areas?
+```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
+# Define rural and urban areas
+election_data <- election_data |> 
+  mutate(area_type = case_when(
+    censo < 10000 ~ "Rural",
+    censo >= 10000 ~ "Urban"
+  ))
+
+# Summarize votes by area type and party
+area_summary <- election_data |> 
+  group_by(area_type, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE),
+            total_municipalities = n(), .groups = "drop") |> 
+  mutate(vote_share = total_votes / sum(total_votes))
+
+# Visualize voting patterns in rural vs. urban areas
+votingpatterns_plot <- ggplot(area_summary, aes(x = siglas, y = vote_share, fill = area_type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = color_palette) +
+  labs(title = "Vote Share by Party in Rural vs. Urban Areas",
+       x = "Party", y = "Vote Share", fill = "Area Type") +
+  theme_presentation()
+```
+
+------------------------------------------------------------------------
 
 ```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
 
+print(votingpatterns_plot)
+```
+
+------------------------------------------------------------------------
+
+### Relationship between census size and vote share
+
+```{r}
+# Analyze relationship between census size and vote share
+census_vote <- election_data |> 
+  group_by(censo, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop")
+
+# Correlation analysis
+correlation_results <- census_vote |> 
+  group_by(siglas) |> 
+  summarise(correlation = cor(censo, total_votes, use = "complete.obs"))
+
+print(correlation_results)
+```
+
+------------------------------------------------------------------------
+
+### Winning Parties in Rural Areas
+
+```{r}
+# Additional analysis: Top parties in rural areas
+rural_winners <- election_data |> 
+  filter(area_type == "Rural") |> 
+  group_by(codigo_municipio, anno, siglas) |> 
+  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_municipio, anno) |> 
+  slice_max(total_votes, n = 1)
+
+# We can take the analysis further and:
+# 1. aggregate the data to count how often each party wins in rural areas:
+rural_party_summary <- rural_winners |> 
+  group_by(siglas) |> 
+  summarise(wins = n(), .groups = "drop") |> 
+  arrange(desc(wins))
+# 2. Visualize Trends with a bar chart (to visualize which parties dominate in rural areas):
+ruralareas_parties_plot <- ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = siglas)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = party_colors) +
+  labs(title = "Winning Parties in Rural Areas", x = "Party", y = "Number of Wins") +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(ruralareas_parties_plot)
+```
+
+------------------------------------------------------------------------
+
+### Vote Percentage Distribution by Party in Rural Areas
+
+```{r}
+# Faceted Histograms: split histogram into separate panels for each party.
+faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
+  geom_histogram(binwidth = 3, color = "white") +
+  facet_wrap(~ siglas, scales = "free_y") +
+  scale_fill_manual(values = party_colors) +
+  labs(title = "Vote Percentage Distribution by Party in Rural Areas",
+       x = "Percentage of Votes",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(faceted_plot)
+```
+
+------------------------------------------------------------------------
+
+### Vote Percentage Distribution by Party in Rural Areas
+
+```{r}
+## !! Overlapping Line Charts (Frequency Polygons)
+overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
+  geom_freqpoly(binwidth = 2, size = 1) +
+  scale_color_manual(values = party_colors) +
+  labs(title = "Vote Percentage Distribution by Party in Rural Areas",
+       x = "Percentage of Votes",
+       y = "Frequency",
+       color = "Party") +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(overlapping_plot)
 ```
 
 ------------------------------------------------------------------------
 
 ## Exercise 5
 
-```{r}
+### How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?
 
+```{r}
+# Set target dates - Changed to November election
+target_date_survey <- as.Date("2019-11-10")  # November election date
+target_date_election <- as.Date("2019-11-01")  # First of November
+
+# Create party name mapping with display names and colors
+party_mapping <- data.frame(
+  survey_name = c(
+    "CIUDADANOS",
+    "PARTIDO NACIONALISTA VASCO",
+    "PARTIDO POPULAR",
+    "PARTIDO SOCIALISTA OBRERO ESPAÑOL",
+    "UNIDAS PODEMOS - IU",
+    "ESQUERRA REPUBLICANA DE CATALUNYA",
+    "EH-BILDU",
+    "VOX",
+    "OTHER"
+  ),
+  election_name = c(
+    "CS",
+    "EAJ-PNV",
+    "PP",
+    "PSOE",
+    "UP",
+    "ERC",
+    "EH-BILDU",
+    "VOX",
+    "OTHER"
+  ),
+  display_name = c(
+    "CS",
+    "EAJ-PNV",
+    "PP",
+    "PSOE",
+    "UP",
+    "ERC",
+    "EH-BILDU",
+    "VOX",
+    "OTHER"
+  ),
+  party_color = c(
+    "#E9521D",  # CS
+    "#04B82B",  # EAJ-PNV
+    "#41A4F5",  # PP
+    "#F93D46",  # PSOE
+    "#7C316E",  # UP
+    "#FF9E33",  # ERC
+    "#03CFB5",  # EH-BILDU
+    "#53FF53",  # VOX
+    "#C0C0C0"   # OTHER
+  )
+)
+
+data_surveys_filtered <- surveys %>%
+  filter(date_elec == target_date_survey) %>%
+  group_by(party_name) %>%
+  summarise(
+    vote_intention = mean(vote_intention, na.rm = TRUE),
+    n_polls = n()
+  ) %>%
+  filter(!is.na(vote_intention)) %>%
+  mutate(vote_share_intention = vote_intention / sum(vote_intention) * 100) %>%
+  left_join(party_mapping, by = c("party_name" = "survey_name"))
+
+data_election <- election_data %>%
+  mutate(date_elec = as.Date(paste(anno, mes, "01", sep = "-")))
+data_election_filtered <- data_election %>%
+  filter(date_elec == target_date_election) %>%
+  group_by(siglas) %>%
+  summarise(
+    total_votes = sum(num_votos, na.rm = TRUE)
+  ) %>%
+  mutate(vote_share_actual = total_votes / sum(total_votes) * 100)
+
+# Merge datasets using the mapped names
+comparison_data <- data_surveys_filtered %>%
+  left_join(data_election_filtered, by = c("election_name" = "siglas"))
+
+# Calculate errors
+comparison_data <- comparison_data %>%
+  mutate(
+    absolute_error = vote_share_intention - vote_share_actual,
+    relative_error = (vote_share_intention - vote_share_actual) / vote_share_actual * 100
+  )
+
+# Calculate overall error metrics
+error_metrics <- comparison_data %>%
+  filter(!is.na(absolute_error)) %>%
+  summarise(
+    mae = mean(abs(absolute_error)),
+    rmse = sqrt(mean(absolute_error^2)),
+    mean_error = mean(absolute_error)
+  )
+
+error_plot <- ggplot(
+  comparison_data %>% filter(!is.na(absolute_error)), 
+  aes(x = reorder(display_name, -vote_share_actual))
+) +
+  geom_col(aes(y = absolute_error), fill = comparison_data$party_color[!is.na(comparison_data$absolute_error)]) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "Polling Error by Party - November 2019 Election",
+    subtitle = paste("Mean Absolute Error:", round(error_metrics$mae, 2), "%"),
+    x = "Party",
+    y = "Error in Vote Share (Prediction - Actual) %"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray95")
+  )
+```
+
+------------------------------------------------------------------------
+
+### Polling Inacuracies 
+
+```{r}
+print("\nDetailed Error Analysis:")
+print(comparison_data %>% 
+        select(display_name, vote_share_intention, vote_share_actual, absolute_error, relative_error))
+print("\nOverall Error Metrics:")
+print(error_metrics)
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(error_plot)
 ```
 
 ------------------------------------------------------------------------
@@ -166,7 +654,79 @@ color_palette <-  c(
 ## Exercise 6
 
 ```{r}
+election_data_clean <- election_data |>
+  filter(!is.na(partido_2) & !is.na(censo) & !is.na(num_votos)) |>
+  filter(censo > 0 & num_votos >= 0) |>
+  mutate(partido_2 = str_to_lower(str_trim(partido_2)))
 
+surveys_clean <- surveys |>
+  filter(!is.na(vote_intention) & !is.na(turnout)) |>
+  mutate(
+    vote_intention = ifelse(vote_intention > 1, vote_intention / 100, vote_intention),
+    turnout = ifelse(turnout > 1, turnout / 100, turnout),
+    party_name = str_to_lower(str_trim(party_name))
+  )
+
+
+surveys_clean <- surveys_clean |>
+  group_by(party_name, pollster) |>
+  summarise(
+    avg_vote_intention = mean(vote_intention, na.rm = TRUE),
+    avg_turnout = mean(turnout, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+merged_data <- election_data_clean|>
+  inner_join(surveys_clean, by = c("partido_2" = "party_name"),relationship = "many-to-many")
+
+merged_data <- merged_data |>
+  mutate(
+    errors = abs(avg_vote_intention * 100 - (num_votos / censo * 100))
+  )
+
+pollster_performance <- merged_data%>%
+  group_by(pollster) %>%
+  summarise(
+    mean_error = mean(errors, na.rm = TRUE),
+    max_error = max(errors, na.rm = TRUE),
+    total_error = sum(errors, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+best_pollsters <- pollster_performance |>
+  arrange(mean_error) |>
+  slice(1:5)
+
+worst_pollsters <- pollster_performance |>
+  arrange(desc(mean_error))|>
+  slice(1:5)
+
+combined_pollsters <- bind_rows(
+  best_pollsters |> mutate(category = "Best"),
+  worst_pollsters |> mutate(category = "Worst")
+)
+
+combined_pollsters <- combined_pollsters %>%
+  arrange(mean_error) 
+
+pollster_plot <- ggplot(combined_pollsters, aes(x = reorder(pollster, desc(mean_error)), y = mean_error)) +
+  geom_bar(stat = "identity", position = "dodge",fill= "blue") +
+  labs(
+    title = "Best and Worst Pollsters by Mean Error",
+    x = "Pollster",
+    y = "Mean Error (Percentage Points)",
+  )  + theme_minimal()+
+  coord_flip() 
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(pollster_plot)
 ```
 
 ------------------------------------------------------------------------
@@ -177,6 +737,7 @@ color_palette <-  c(
 
 ```{r}
 # Filter election_data
+election_data <- readRDS("data/processed/election_data.rds")
 
 elections_1911 <- election_data |> 
   filter(anno == 2019 & mes == 11) |> 
@@ -246,22 +807,14 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
 ```{r}
 #| echo: false
 #| fig-width: 12
-#| fig-height: 8
+#| fig-height: 6
 
 pop_prov_cartog
 ```
 
 ------------------------------------------------------------------------
 
-## Original exercise 2: Parliament plot (?)
-
-```{r}
-
-```
-
-------------------------------------------------------------------------
-
-## Original exercise 2: Income and Populistic Voting
+## Original exercise 2: Income and Populist Voting
 
 ### First steps: Data download and wrangling
 
@@ -325,6 +878,8 @@ print(paste("National average growth rate:", round(national_avg_growth, 2), "%")
 ### Next: Get VOX election results and join
 
 ```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
 # calculate VOX results by CCAA for November 2019
 vox_results_2019 <- election_data |> 
   filter(anno == 2019, mes == 11) |> 
@@ -574,7 +1129,7 @@ cartogram_vox_plot <- ggplot(cartogram_plot) +
 #| fig-width: 12
 #| fig-height: 8
 
-cartorgram_vox_plot
+cartogram_vox_plot
 ```
 
 ------------------------------------------------------------------------
