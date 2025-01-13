@@ -82,7 +82,7 @@ ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
     fill = "Second-Place Party"
   ) +
   theme_minimal()
-)
+ )
 
 ## otherwise, but I don't like it:
 ## Plot results: Stacked bar plot with years
