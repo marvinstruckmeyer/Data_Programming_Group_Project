@@ -81,11 +81,8 @@ ggplot(second_places_year, aes(x = factor(anno), fill = second_place)) +
     x = "Year of Election", y = "Number of Municipalities",
     fill = "Second-Place Party"
   ) +
-  theme_minimal() +
-  theme(
-    text = element_text(family = "RobotoCondensed"),  # Use Roboto Condensed font
-    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better readability
-  )
+  theme_minimal()
+)
 
 ## otherwise, but I don't like it:
 ## Plot results: Stacked bar plot with years
