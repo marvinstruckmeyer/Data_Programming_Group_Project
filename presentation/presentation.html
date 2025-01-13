@@ -415,7 +415,7 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <li><p>Exercise 6</p></li>
 <li><p>Original Exercise 1: Dorling Cartogram</p></li>
 <li><p>Original Exercise 2: Parliamentary plot</p></li>
-<li><p>Original Exercise 2:</p></li>
+<li><p>Original Exercise 2: Income and Populistic Voting</p></li>
 </ul>
 </div>
 </section>
@@ -432,12 +432,18 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <span id="cb1-8"><a href=""></a><span class="fu">library</span>(sysfonts) </span>
 <span id="cb1-9"><a href=""></a><span class="fu">library</span>(showtext) </span>
 <span id="cb1-10"><a href=""></a></span>
-<span id="cb1-11"><a href=""></a><span class="co"># Others</span></span>
-<span id="cb1-12"><a href=""></a><span class="fu">library</span>(stringi) </span>
-<span id="cb1-13"><a href=""></a><span class="fu">library</span>(rvest)</span>
-<span id="cb1-14"><a href=""></a></span>
-<span id="cb1-15"><a href=""></a><span class="co"># download Excel data</span></span>
-<span id="cb1-16"><a href=""></a><span class="fu">library</span>(readxl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-11"><a href=""></a><span class="co"># Maps &amp; Geospatial data</span></span>
+<span id="cb1-12"><a href=""></a></span>
+<span id="cb1-13"><a href=""></a><span class="fu">library</span>(mapSpain)</span>
+<span id="cb1-14"><a href=""></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-15"><a href=""></a><span class="fu">library</span>(cartogram)</span>
+<span id="cb1-16"><a href=""></a></span>
+<span id="cb1-17"><a href=""></a><span class="co"># Others</span></span>
+<span id="cb1-18"><a href=""></a><span class="fu">library</span>(stringi) </span>
+<span id="cb1-19"><a href=""></a><span class="fu">library</span>(rvest)</span>
+<span id="cb1-20"><a href=""></a></span>
+<span id="cb1-21"><a href=""></a><span class="co"># Download Excel data</span></span>
+<span id="cb1-22"><a href=""></a><span class="fu">library</span>(readxl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="set-up" class="slide level2">
@@ -571,16 +577,17 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <section class="slide level2">
 
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-14-1.png" width="1152" class="r-stretch"></section>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-13-1.png" width="1152" class="r-stretch"></section>
 <section id="original-exercise-2-parliament-plot" class="slide level2">
 <h2>Original exercise 2: Parliament plot (?)</h2>
 </section>
-<section id="original-exercise-3-tbd" class="slide level2">
-<h2>Original exercise 3: TBD</h2>
+<section id="original-exercise-3-do-economically-left-behind-provinces-vote-more-populistic" class="slide level2">
+<h2>Original exercise 3: Do economically left behind provinces vote more populistic?</h2>
+<h3 id="first-steps-data-download-and-wrangling">First steps: Data download and wrangling</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># source: REGDATA_v70_55_23.xlsx from :</span></span>
-<span id="cb5-2"><a href=""></a><span class="co"># https://www.bbvaresearch.com/en/publicaciones/spain-long-series-of-regional-economic-and-demographic-aggregates-2023-update/</span></span>
-<span id="cb5-3"><a href=""></a></span>
+<span id="cb5-2"><a href=""></a><span class="co"># https://www.bbvaresearch.com/en/publicaciones/spain-long-series-of-regional-</span></span>
+<span id="cb5-3"><a href=""></a><span class="co"># economic-and-demographic-aggregates-2023-update/</span></span>
 <span id="cb5-4"><a href=""></a></span>
 <span id="cb5-5"><a href=""></a><span class="co"># convert both datasets to long format</span></span>
 <span id="cb5-6"><a href=""></a>gdp_long <span class="ot">&lt;-</span> gdp_data <span class="sc">|&gt;</span> </span>
@@ -659,6 +666,12 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "National average growth rate: 23.97 %"</code></pre>
 </div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="next">Next:</h3>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="co"># calculate VOX results by CCAA for November 2019</span></span>
 <span id="cb11-2"><a href=""></a>vox_results_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
 <span id="cb11-3"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
@@ -732,6 +745,12 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 17 CAN            -21.2            12.6  Below Average  
 18 BAL            -21.9            17.3  Below Average  </code></pre>
 </div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="now">Now:</h3>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a><span class="co"># calculate correlation (excluding NA values)</span></span>
 <span id="cb15-2"><a href=""></a>correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(combined_analysis<span class="sc">$</span>relative_growth, </span>
 <span id="cb15-3"><a href=""></a>                   combined_analysis<span class="sc">$</span>vox_percentage,</span>
@@ -741,7 +760,7 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <pre><code>[1] "\nCorrelation between relative GDP growth and VOX support: -0.142"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a><span class="co"># create scatter plot</span></span>
-<span id="cb17-2"><a href=""></a><span class="fu">ggplot</span>(combined_analysis, <span class="fu">aes</span>(<span class="at">x =</span> relative_growth, <span class="at">y =</span> vox_percentage)) <span class="sc">+</span></span>
+<span id="cb17-2"><a href=""></a>scatter_plot_1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(combined_analysis, <span class="fu">aes</span>(<span class="at">x =</span> relative_growth, <span class="at">y =</span> vox_percentage)) <span class="sc">+</span></span>
 <span id="cb17-3"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> growth_category), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
 <span id="cb17-4"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> region), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
 <span id="cb17-5"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
@@ -756,9 +775,12 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <span id="cb17-14"><a href=""></a>  <span class="fu">theme</span>(</span>
 <span id="cb17-15"><a href=""></a>    <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
 <span id="cb17-16"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-
 </div>
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-16-1.png" width="960" class="r-stretch"><div class="quarto-auto-generated-content">
+</section>
+<section class="slide level2">
+
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-18-1.png" width="1152" class="r-stretch"><div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
 </div>
@@ -975,80 +997,42 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
       });
     </script>
     
-
     <script>
-
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-
       // slide changes (different for each slide format).
-
       (function () {
-
         // dispatch for htmlwidgets
-
         function fireSlideEnter() {
-
           const event = window.document.createEvent("Event");
-
           event.initEvent("slideenter", true, true);
-
           window.document.dispatchEvent(event);
-
         }
-
-    
 
         function fireSlideChanged(previousSlide, currentSlide) {
-
           fireSlideEnter();
 
-    
-
           // dispatch for shiny
-
           if (window.jQuery) {
-
             if (previousSlide) {
-
               window.jQuery(previousSlide).trigger("hidden");
-
             }
-
             if (currentSlide) {
-
               window.jQuery(currentSlide).trigger("shown");
-
             }
-
           }
-
         }
-
-    
 
         // hookup for slidy
-
         if (window.w3c_slidy) {
-
           window.w3c_slidy.add_observer(function (slide_num) {
-
             // slide_num starts at position 1
-
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-
           });
-
         }
 
-    
-
       })();
-
     </script>
-
-    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
