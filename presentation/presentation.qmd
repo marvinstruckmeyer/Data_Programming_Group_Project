@@ -124,7 +124,7 @@ color_palette <-  c(
 ```
 
 ## Exercise 1
-
+Which party was the winner in the municipalities with more than 100,000 habitants (census) in each of the elections?
 ```{r}
 big_municipalities <- election_data|> 
   filter(censo > 100000)
@@ -139,12 +139,7 @@ winners <- big_municipalities |>
 
 winners_plot <- ggplot(winners, aes(x = anno, fill = siglas)) +
   geom_bar(position = "dodge") + scale_fill_manual(
-    values = c( "PSOE" = "#F93D46",
-                "PP" = "#41A4F5",
-                "VOX" = "#53FF53",
-                "ERC" = "#FF9E33",
-                "EAJ-PNV" = "#04B82B",
-                "OTHER" = "#C0C0C0"))+
+    values = party_colors)+
   labs(title = "Winning Parties in Municipalities",
        x = "Year", y = "Number of Municipalities", fill = "Party") +
   theme_minimal()
@@ -171,18 +166,7 @@ regional_summary <- big_municipalities |>
 
 regional_plot <- ggplot(regional_summary, aes(x = anno, y = total_municipalities, color = partido_2)) +
   geom_line(linewidth = 1.2) + scale_fill_manual(values = c(scale_fill_manual(
-    values = c( #E69F00",  # orange
-      "#56B4E9",  # light blue
-      "#009E73",  # green
-      "#F0E442",  # yellow
-      "#0072B2",  # dark blue
-      "#D55E00",  # red
-      "#CC79A7",  # pink
-      "#999999",  # grey
-      "#44AA99",  # teal
-      "#332288",  # indigo
-      "#AA4499",  # purple
-      "#117733"))))+
+    values = color_palette)))+
   facet_wrap(~codigo_ccaa) + 
   labs(title = "Regional Performance of Parties Over Time",
        x = "Year", y = "Number of Municipalities", color = "Party") +
@@ -204,7 +188,7 @@ print(regional_plot)
 ------------------------------------------------------------------------
 
 ## Exercise 2
-
+Which party was the second when the first was the PSOE? And when the first was the PP?
 ```{r}
 # Identify winners and second-place parties using siglas
 ranked_parties <- big_municipalities |> 
@@ -288,7 +272,7 @@ print(firstsecond_year_plot)
 ------------------------------------------------------------------------
 
 ## Exercise 3
-
+Who benefits from low turnout?
 ```{r}
 
 ```
@@ -350,21 +334,6 @@ print(correlation_results)
 ------------------------------------------------------------------------
 
 ```{r}
-# Additional analysis: Top parties in rural areas
-rural_winners <- election_data |> 
-  filter(area_type == "Rural") |> 
-  group_by(codigo_municipio, anno, siglas) |> 
-  summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = "drop") |> 
-  group_by(codigo_municipio, anno) |> 
-  slice_max(total_votes, n = 1)
-
-print(rural_winners)
-# a table listing the most successful parties in rural municipalities
-```
-
-------------------------------------------------------------------------
-
-```{r}
 # We can take the analysis further and:
 # 1. aggregate the data to count how often each party wins in rural areas:
 rural_party_summary <- rural_winners |> 
@@ -394,13 +363,8 @@ print(ruralareas_parties_plot)
 ------------------------------------------------------------------------
 
 ```{r}
-#| echo: false
-#| fig-width: 12
-#| fig-height: 8
-
-# !! Faceted Histograms
-# split the histogram into separate panels for each party using facet_wrap.
-ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
+# Faceted Histograms: split histogram into separate panels for each party.
+faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
   geom_histogram(binwidth = 3, color = "white") +
   facet_wrap(~ siglas, scales = "free_y") +
   scale_fill_manual(values = party_colors) +
@@ -417,8 +381,14 @@ ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
 #| fig-width: 12
 #| fig-height: 8
 
+print(faceted_plot)
+```
+
+------------------------------------------------------------------------
+
+```{r}
 ## !! Overlapping Line Charts (Frequency Polygons)
-ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
+overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
   geom_freqpoly(binwidth = 2, size = 1) +
   scale_color_manual(values = party_colors) +
   labs(title = "Vote Percentage Distribution by Party in Rural Areas",
@@ -426,6 +396,16 @@ ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
        y = "Frequency",
        color = "Party") +
   theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+print(overlapping_plot)
 ```
 
 ------------------------------------------------------------------------
