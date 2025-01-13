@@ -389,7 +389,7 @@ print(paste("\nCorrelation between relative GDP growth and VOX support:", round(
 scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_percentage)) +
   geom_point(aes(color = growth_category), size = 3) +
   geom_text(aes(label = region), vjust = -0.5, size = 3) +
-  geom_smooth(method = "lm", color = "red", linetype = "dashed", se = FALSE) +
+  geom_smooth(method = "lm", color = color_palette[6], linetype = "dashed", se = FALSE) +
   labs(
     title = "Relationship between Economic Growth and VOX Support",
     subtitle = "By Autonomous Community (1999-2019)",
@@ -397,7 +397,7 @@ scatter_plot_1 <- ggplot(combined_analysis, aes(x = relative_growth, y = vox_per
     y = "VOX Vote Share (%)",
     color = "Growth Category"
   ) +
-  theme_minimal() +
+  theme_presentation() +
   theme(
     legend.position = "bottom",
     plot.title = element_text(face = "bold"))
@@ -472,8 +472,8 @@ cor(final_analysis$turnout, final_analysis$vox_share)
 
 # visualise
 turnout_vox_share_plot <- ggplot(final_analysis) +
-  geom_point(aes(x = turnout, y = vox_share), alpha = 0.3, color = "#52BE80", size = 2) +
-  geom_smooth(aes(x = turnout, y = vox_share), method = "lm", se = TRUE, color = "#52BE80") +
+  geom_point(aes(x = turnout, y = vox_share), alpha = 0.3, color = color_palette[3], size = 2) +
+  geom_smooth(aes(x = turnout, y = vox_share), method = "lm", se = TRUE, color = color_palette[3]) +
   labs(
     title = "Relationship between Turnout and VOX Vote Share (November 2019)",
     subtitle = "Analysis by Municipality",
@@ -531,7 +531,7 @@ sysfonts::font_add_google("Roboto Condensed", family = "rob_cond")
 showtext::showtext_auto()
 
 # create color palette for VOX vote share
-vox_colors <- colorRampPalette(c("#FFFFFF", "#53FF53"))(5)
+vox_colors <- colorRampPalette(c("#FFFFFF", party_colors["VOX"]))(5)
 
 # create Dorling cartogram
 cartogram_plot <- cartogram_dorling(final_data, weight = "n_pop")
@@ -596,9 +596,9 @@ fragmentation_analysis <- election_data |>
 # first visualisation: scatter plot of VOX share vs effective number of parties
 fragmentation_analysis_1 <- ggplot(fragmentation_analysis) +
   geom_point(aes(x = effective_parties, y = vox_share), 
-             alpha = 0.4, color = "#52BE80") +
+             alpha = 0.4, color = color_palette[3]) +
   geom_smooth(aes(x = effective_parties, y = vox_share), 
-              method = "lm", color = "#2E86C1") +
+              method = "lm", color = color_palette[2]) +
   labs(
     title = "VOX Support vs Electoral Fragmentation",
     subtitle = "November 2019 Elections",
@@ -610,9 +610,9 @@ fragmentation_analysis_1 <- ggplot(fragmentation_analysis) +
 # second visualisation: scatter plot with traditional party share
 fragmentation_analysis_2 <- ggplot(fragmentation_analysis) +
   geom_point(aes(x = traditional_share, y = vox_share), 
-             alpha = 0.4, color = "#E74C3C") +
+             alpha = 0.4, color = color_palette[6]) +
   geom_smooth(aes(x = traditional_share, y = vox_share), 
-              method = "lm", color = "#8E44AD") +
+              method = "lm", color = color_palette[10]) +
   labs(
     title = "VOX Support vs Traditional Party Support",
     subtitle = "November 2019 Elections",
@@ -647,4 +647,6 @@ fragmentation_analysis_1
 #| fig-height: 8
 fragmentation_analysis_2
 ```
+
+
 
