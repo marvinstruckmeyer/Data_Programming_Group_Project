@@ -1,15 +1,43 @@
 ---
 title: "Data Programming Group Project"
+author: "Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Estela Moral"
 format: 
   revealjs:
+    theme: solarized
     scrollable: true
-    toc: true
+    toc: false
     toc-location: right
     toc-title: Index
     echo: true
 ---
 
-# Libraries:
+## Overview
+
+::: {style="font-size: 0.9em;"}
+
+-   Exercise 1
+
+-   Exercise 2
+
+-   Exercise 3
+
+-   Exercise 4
+
+-   Exercise 5
+
+-   Exercise 6
+
+-   Original Exercise 1: Dorling Cartogram
+
+-   Original Exercise 2: Parliamentary plot
+
+-   Original Exercise 2:
+
+:::
+
+------------------------------------------------------------------------
+
+## Libraries
 
 ```{r}
 # Github
@@ -17,11 +45,6 @@ library(gert)
 
 # Data cleaning
 library(tidyverse)
-
-# Maps & Geospatial data
-library(mapSpain)
-library(sf)
-library(cartogram)
 
 # Font setting
 library(sysfonts) 
@@ -35,20 +58,19 @@ library(rvest)
 library(readxl)
 ```
 
-------------------------------------------------------------------------
-
-Load Data files:
-
 ```{r}
 #| include: false
 
-election_data <- read_csv("data/processed/election_data.rds")
-surveys <- read_csv("data/processed/surveys.rds")
+election_data <- readRDS("data/processed/election_data.rds")
+surveys <- readRDS("data/processed/surveys.rds")
 
-gdp_data <- read_excel("R/data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
-pop_data <- read_excel("R/data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
+gdp_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "GDP")
+pop_data <- read_excel("data/raw/External_GDP_Pop_Data.xlsx", sheet = "Population")
 ```
 
+------------------------------------------------------------------------
+
+## Set up
 
 ```{r}
 # define a custom theme
@@ -145,8 +167,100 @@ color_palette <-  c(
 
 ## Original exercise 1: Dorling cartogram
 
-```{r}
+### Important libraries
 
+-   `sf`
+
+-   `mapSpain`
+
+-   `cartogram`
+
+```{r}
+#| include: false
+
+library(mapSpain)
+library(sf)
+library(cartogram)
+```
+
+------------------------------------------------------------------------
+
+### First steps
+
+```{r}
+# Filter election_data
+
+elections_1911 <- election_data |> 
+  filter(anno == 2019 & mes == 11) |> 
+  select(municipio, cod_mun, codigo_provincia, num_votos, siglas, partido, partido_2)
+
+winners_prov <- elections_1911 |> 
+  group_by(codigo_provincia, siglas) |>  
+  summarise(votos_totales = sum(num_votos, na.rm = TRUE)) |> 
+  slice_max(votos_totales)
+
+# Prepare geospatial data:
+
+provinces <- esp_get_prov() |> 
+  mutate(provincia = prov.shortname.en) |> 
+  mutate(codigo_provincia = cpro) |> 
+  select(provincia, codigo_provincia)
+
+# Set Mercator projection:
+
+provinces <- st_transform(provinces, 3857)
+
+# Population data:
+
+pop_prov <- mapSpain::pobmun19 |> 
+  rename(codigo_provincia = cpro) |> 
+  group_by(codigo_provincia) |> 
+  summarise(n_pop = sum(pob19))
+
+# Join all dataframes:
+
+pop_prov <- provinces |> 
+  left_join(pop_prov, by = "codigo_provincia") |> 
+  left_join(winners_prov, by = "codigo_provincia")
+```
+
+------------------------------------------------------------------------
+
+### Create the cartogram
+
+```{r}
+pop_prov_cartog <- cartogram_dorling(pop_prov, 
+                                     weight = "n_pop")
+
+pop_prov_cartog <- ggplot(pop_prov_cartog) +
+  geom_sf(aes(fill = siglas)) +
+  scale_fill_manual(values = party_colors,
+                    name = "Party",
+                    breaks = c("PSOE", "PP", "VOX", "ERC", "EAJ-PNV", "OTHER")) +
+  theme_void() +
+  labs(title = "2019 November Elections: Most voted party by province",
+       subtitle = "(The size of each circle represents the population of each province)") +
+  theme(plot.title = element_text(face = "bold",
+                                  margin = unit(c(0.6, 0, 0.2, 0), "cm"),
+                                  size = 18,
+                                  family = "rob_cond"),
+        plot.subtitle = element_text(family = "rob_cond",
+                                     size = 14),
+        legend.title = element_text(face = "bold",
+                                    family = "rob_cond", 
+                                    size = 15),
+        legend.text = element_text(family = "rob_cond", 
+                                    size = 12))
+```
+
+------------------------------------------------------------------------
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+
+pop_prov_cartog
 ```
 
 ------------------------------------------------------------------------
@@ -285,6 +399,3 @@ ggplot(combined_analysis, aes(x = relative_growth, y = vox_percentage)) +
     legend.position = "bottom",
     plot.title = element_text(face = "bold"))
 ```
-
-
-
