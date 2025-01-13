@@ -417,6 +417,8 @@ How to analyze the relationship between census and vote? Is it true that certain
 
 
 ```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
 # Define rural and urban areas
 election_data <- election_data |> 
   mutate(area_type = case_when(
@@ -457,10 +459,14 @@ print(votingpatterns_plot)
 
 
 ------------------------------------------------------------------------
-Relationship between census size and vote share
+
+### Relationship between census size and vote share
+
 
 
 ```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
 # Analyze relationship between census size and vote share
 census_vote <- election_data |> 
   group_by(censo, siglas) |> 
@@ -477,7 +483,9 @@ print(correlation_results)
 
 
 ------------------------------------------------------------------------
-Winning Parties in Rural Areas
+
+### Winning Parties in Rural Areas
+
 
 
 ```{r}
@@ -520,7 +528,9 @@ print(ruralareas_parties_plot)
 
 
 ------------------------------------------------------------------------
-Vote Percentage Distribution by Party in Rural Areas
+
+### Vote Percentage Distribution by Party in Rural Areas
+
 
 
 ```{r}
@@ -552,7 +562,9 @@ print(faceted_plot)
 
 
 ------------------------------------------------------------------------
-Vote Percentage Distribution by Party in Rural Areas
+
+### Vote Percentage Distribution by Party in Rural Areas
+
 
 
 ```{r}
@@ -826,6 +838,7 @@ print(pollster_plot)
 
 ```{r}
 # Filter election_data
+election_data <- readRDS("data/processed/election_data.rds")
 
 elections_1911 <- election_data |> 
   filter(anno == 2019 & mes == 11) |> 
@@ -906,18 +919,6 @@ pop_prov_cartog <- ggplot(pop_prov_cartog) +
 #| fig-height: 6
 
 pop_prov_cartog
-```
-
-
-
-------------------------------------------------------------------------
-
-## Original exercise 2: Parliament plot (?)
-
-
-
-```{r}
-
 ```
 
 

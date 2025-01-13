@@ -726,214 +726,225 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 </section>
 <section class="slide level2">
 
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-15-1.png" width="1152" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="relationship-between-census-size-and-vote-share">Relationship between census size and vote share</h3>
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="presentation_files/figure-revealjs/unnamed-chunk-15-1.png" width="1152"></p>
-</figure>
-</div>
-</div>
-</div>
-<table class="caption-top">
-<colgroup>
-<col style="width: 100%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Relationship between census size and vote share</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Winning Parties in Rural Areas</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">::: {.cell}</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">```{.r .cell-code} # Additional analysis: Top parties in rural areas rural_winners &lt;- election_data |&gt; filter(area_type == “Rural”) |&gt; group_by(codigo_municipio, anno, siglas) |&gt; summarise(total_votes = sum(num_votos, na.rm = TRUE), .groups = “drop”) |&gt; group_by(codigo_municipio, anno) |&gt; slice_max(total_votes, n = 1)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"># We can take the analysis further and: # 1. aggregate the data to count how often each party wins in rural areas: rural_party_summary &lt;- rural_winners |&gt; group_by(siglas) |&gt; summarise(wins = n(), .groups = “drop”) |&gt; arrange(desc(wins)) # 2. Visualize Trends with a bar chart (to visualize which parties dominate in rural areas): ruralareas_parties_plot &lt;- ggplot(rural_party_summary, aes(x = reorder(siglas, wins), y = wins, fill = siglas)) + geom_bar(stat = “identity”) + scale_fill_manual(values = party_colors) + labs(title = “Winning Parties in Rural Areas”, x = “Party”, y = “Number of Wins”) + theme_minimal() ``` :::</td>
-</tr>
-</tbody>
-</table>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="presentation_files/figure-revealjs/unnamed-chunk-18-1.png" width="1152"></p>
-</figure>
-</div>
-</div>
-</div>
-<table class="caption-top">
-<colgroup>
-<col style="width: 100%">
-</colgroup>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Vote Percentage Distribution by Party in Rural Areas</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">::: {.cell}</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>{.r .cell-code} # Faceted Histograms: split histogram into separate panels for each party. faceted_plot &lt;- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) + geom_histogram(binwidth = 3, color = "white") + facet_wrap(~ siglas, scales = "free_y") + scale_fill_manual(values = party_colors) + labs(title = "Vote Percentage Distribution by Party in Rural Areas", x = "Percentage of Votes", y = "Frequency") + theme_minimal()</code> :::</td>
-</tr>
-</tbody>
-</table>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="presentation_files/figure-revealjs/unnamed-chunk-20-1.png" width="1152"></p>
-</figure>
-</div>
-</div>
-</div>
-<table class="caption-top">
-<colgroup>
-<col style="width: 100%">
-</colgroup>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Vote Percentage Distribution by Party in Rural Areas</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">::: {.cell}</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><code>{.r .cell-code} ## !! Overlapping Line Charts (Frequency Polygons) overlapping_plot &lt;- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) + geom_freqpoly(binwidth = 2, size = 1) + scale_color_manual(values = party_colors) + labs(title = "Vote Percentage Distribution by Party in Rural Areas", x = "Percentage of Votes", y = "Frequency", color = "Party") + theme_minimal()</code> :::</td>
-</tr>
-</tbody>
-</table>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="presentation_files/figure-revealjs/unnamed-chunk-22-1.png" width="1152"></p>
-</figure>
-</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="co"># Analyze relationship between census size and vote share</span></span>
+<span id="cb9-2"><a href=""></a>census_vote <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href=""></a>  <span class="fu">group_by</span>(censo, siglas) <span class="sc">|&gt;</span> </span>
+<span id="cb9-4"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb9-5"><a href=""></a></span>
+<span id="cb9-6"><a href=""></a><span class="co"># Correlation analysis</span></span>
+<span id="cb9-7"><a href=""></a>correlation_results <span class="ot">&lt;-</span> census_vote <span class="sc">|&gt;</span> </span>
+<span id="cb9-8"><a href=""></a>  <span class="fu">group_by</span>(siglas) <span class="sc">|&gt;</span> </span>
+<span id="cb9-9"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">correlation =</span> <span class="fu">cor</span>(censo, total_votes, <span class="at">use =</span> <span class="st">"complete.obs"</span>))</span>
+<span id="cb9-10"><a href=""></a></span>
+<span id="cb9-11"><a href=""></a><span class="fu">print</span>(correlation_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 2
+   siglas   correlation
+   &lt;chr&gt;          &lt;dbl&gt;
+ 1 BNG           NA    
+ 2 CIU           NA    
+ 3 CS             0.981
+ 4 EAJ-PNV        0.110
+ 5 EH-BILDU       0.110
+ 6 ERC            0.381
+ 7 MP            NA    
+ 8 OTHER          0.605
+ 9 PP             0.958
+10 PSOE           0.984
+11 UP             0.986
+12 VOX            0.874</code></pre>
 </div>
 </div>
 </section>
+<section class="slide level2">
+
+<h3 id="winning-parties-in-rural-areas">Winning Parties in Rural Areas</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="co"># Additional analysis: Top parties in rural areas</span></span>
+<span id="cb11-2"><a href=""></a>rural_winners <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href=""></a>  <span class="fu">filter</span>(area_type <span class="sc">==</span> <span class="st">"Rural"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-4"><a href=""></a>  <span class="fu">group_by</span>(codigo_municipio, anno, siglas) <span class="sc">|&gt;</span> </span>
+<span id="cb11-5"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-6"><a href=""></a>  <span class="fu">group_by</span>(codigo_municipio, anno) <span class="sc">|&gt;</span> </span>
+<span id="cb11-7"><a href=""></a>  <span class="fu">slice_max</span>(total_votes, <span class="at">n =</span> <span class="dv">1</span>)</span>
+<span id="cb11-8"><a href=""></a></span>
+<span id="cb11-9"><a href=""></a><span class="co"># We can take the analysis further and:</span></span>
+<span id="cb11-10"><a href=""></a><span class="co"># 1. aggregate the data to count how often each party wins in rural areas:</span></span>
+<span id="cb11-11"><a href=""></a>rural_party_summary <span class="ot">&lt;-</span> rural_winners <span class="sc">|&gt;</span> </span>
+<span id="cb11-12"><a href=""></a>  <span class="fu">group_by</span>(siglas) <span class="sc">|&gt;</span> </span>
+<span id="cb11-13"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">wins =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-14"><a href=""></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(wins))</span>
+<span id="cb11-15"><a href=""></a><span class="co"># 2. Visualize Trends with a bar chart (to visualize which parties dominate in rural areas):</span></span>
+<span id="cb11-16"><a href=""></a>ruralareas_parties_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(rural_party_summary, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(siglas, wins), <span class="at">y =</span> wins, <span class="at">fill =</span> siglas)) <span class="sc">+</span></span>
+<span id="cb11-17"><a href=""></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb11-18"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> party_colors) <span class="sc">+</span></span>
+<span id="cb11-19"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Winning Parties in Rural Areas"</span>, <span class="at">x =</span> <span class="st">"Party"</span>, <span class="at">y =</span> <span class="st">"Number of Wins"</span>) <span class="sc">+</span></span>
+<span id="cb11-20"><a href=""></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-18-1.png" width="1152" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="vote-percentage-distribution-by-party-in-rural-areas">Vote Percentage Distribution by Party in Rural Areas</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a><span class="co"># Faceted Histograms: split histogram into separate panels for each party.</span></span>
+<span id="cb12-2"><a href=""></a>faceted_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(election_data, <span class="fu">aes</span>(<span class="at">x =</span> num_votos <span class="sc">/</span> censo <span class="sc">*</span> <span class="dv">100</span>, <span class="at">fill =</span> siglas)) <span class="sc">+</span></span>
+<span id="cb12-3"><a href=""></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">3</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href=""></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> siglas, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb12-5"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> party_colors) <span class="sc">+</span></span>
+<span id="cb12-6"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Vote Percentage Distribution by Party in Rural Areas"</span>,</span>
+<span id="cb12-7"><a href=""></a>       <span class="at">x =</span> <span class="st">"Percentage of Votes"</span>,</span>
+<span id="cb12-8"><a href=""></a>       <span class="at">y =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb12-9"><a href=""></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-20-1.png" width="1152" class="r-stretch"></section>
+<section class="slide level2">
+
+<p>###Vote Percentage Distribution by Party in Rural Areas</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="do">## !! Overlapping Line Charts (Frequency Polygons)</span></span>
+<span id="cb13-2"><a href=""></a>overlapping_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(election_data, <span class="fu">aes</span>(<span class="at">x =</span> num_votos <span class="sc">/</span> censo <span class="sc">*</span> <span class="dv">100</span>, <span class="at">color =</span> siglas)) <span class="sc">+</span></span>
+<span id="cb13-3"><a href=""></a>  <span class="fu">geom_freqpoly</span>(<span class="at">binwidth =</span> <span class="dv">2</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb13-4"><a href=""></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> party_colors) <span class="sc">+</span></span>
+<span id="cb13-5"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Vote Percentage Distribution by Party in Rural Areas"</span>,</span>
+<span id="cb13-6"><a href=""></a>       <span class="at">x =</span> <span class="st">"Percentage of Votes"</span>,</span>
+<span id="cb13-7"><a href=""></a>       <span class="at">y =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb13-8"><a href=""></a>       <span class="at">color =</span> <span class="st">"Party"</span>) <span class="sc">+</span></span>
+<span id="cb13-9"><a href=""></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-22-1.png" width="1152" class="r-stretch"></section>
 <section id="exercise-5" class="slide level2">
 <h2>Exercise 5</h2>
 <h3 id="how-to-calibrate-the-error-of-the-polls-remember-that-the-polls-are-voting-intentions-at-national-level">How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="co"># Set target dates - Changed to November election</span></span>
-<span id="cb9-2"><a href=""></a>target_date_survey <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2019-11-10"</span>)  <span class="co"># November election date</span></span>
-<span id="cb9-3"><a href=""></a>target_date_election <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2019-11-01"</span>)  <span class="co"># First of November</span></span>
-<span id="cb9-4"><a href=""></a></span>
-<span id="cb9-5"><a href=""></a><span class="co"># Create party name mapping with display names and colors</span></span>
-<span id="cb9-6"><a href=""></a>party_mapping <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb9-7"><a href=""></a>  <span class="at">survey_name =</span> <span class="fu">c</span>(</span>
-<span id="cb9-8"><a href=""></a>    <span class="st">"CIUDADANOS"</span>,</span>
-<span id="cb9-9"><a href=""></a>    <span class="st">"PARTIDO NACIONALISTA VASCO"</span>,</span>
-<span id="cb9-10"><a href=""></a>    <span class="st">"PARTIDO POPULAR"</span>,</span>
-<span id="cb9-11"><a href=""></a>    <span class="st">"PARTIDO SOCIALISTA OBRERO ESPAÑOL"</span>,</span>
-<span id="cb9-12"><a href=""></a>    <span class="st">"UNIDAS PODEMOS - IU"</span>,</span>
-<span id="cb9-13"><a href=""></a>    <span class="st">"ESQUERRA REPUBLICANA DE CATALUNYA"</span>,</span>
-<span id="cb9-14"><a href=""></a>    <span class="st">"EH-BILDU"</span>,</span>
-<span id="cb9-15"><a href=""></a>    <span class="st">"VOX"</span>,</span>
-<span id="cb9-16"><a href=""></a>    <span class="st">"OTHER"</span></span>
-<span id="cb9-17"><a href=""></a>  ),</span>
-<span id="cb9-18"><a href=""></a>  <span class="at">election_name =</span> <span class="fu">c</span>(</span>
-<span id="cb9-19"><a href=""></a>    <span class="st">"CS"</span>,</span>
-<span id="cb9-20"><a href=""></a>    <span class="st">"EAJ-PNV"</span>,</span>
-<span id="cb9-21"><a href=""></a>    <span class="st">"PP"</span>,</span>
-<span id="cb9-22"><a href=""></a>    <span class="st">"PSOE"</span>,</span>
-<span id="cb9-23"><a href=""></a>    <span class="st">"UP"</span>,</span>
-<span id="cb9-24"><a href=""></a>    <span class="st">"ERC"</span>,</span>
-<span id="cb9-25"><a href=""></a>    <span class="st">"EH-BILDU"</span>,</span>
-<span id="cb9-26"><a href=""></a>    <span class="st">"VOX"</span>,</span>
-<span id="cb9-27"><a href=""></a>    <span class="st">"OTHER"</span></span>
-<span id="cb9-28"><a href=""></a>  ),</span>
-<span id="cb9-29"><a href=""></a>  <span class="at">display_name =</span> <span class="fu">c</span>(</span>
-<span id="cb9-30"><a href=""></a>    <span class="st">"CS"</span>,</span>
-<span id="cb9-31"><a href=""></a>    <span class="st">"EAJ-PNV"</span>,</span>
-<span id="cb9-32"><a href=""></a>    <span class="st">"PP"</span>,</span>
-<span id="cb9-33"><a href=""></a>    <span class="st">"PSOE"</span>,</span>
-<span id="cb9-34"><a href=""></a>    <span class="st">"UP"</span>,</span>
-<span id="cb9-35"><a href=""></a>    <span class="st">"ERC"</span>,</span>
-<span id="cb9-36"><a href=""></a>    <span class="st">"EH-BILDU"</span>,</span>
-<span id="cb9-37"><a href=""></a>    <span class="st">"VOX"</span>,</span>
-<span id="cb9-38"><a href=""></a>    <span class="st">"OTHER"</span></span>
-<span id="cb9-39"><a href=""></a>  ),</span>
-<span id="cb9-40"><a href=""></a>  <span class="at">party_color =</span> <span class="fu">c</span>(</span>
-<span id="cb9-41"><a href=""></a>    <span class="st">"#E9521D"</span>,  <span class="co"># CS</span></span>
-<span id="cb9-42"><a href=""></a>    <span class="st">"#04B82B"</span>,  <span class="co"># EAJ-PNV</span></span>
-<span id="cb9-43"><a href=""></a>    <span class="st">"#41A4F5"</span>,  <span class="co"># PP</span></span>
-<span id="cb9-44"><a href=""></a>    <span class="st">"#F93D46"</span>,  <span class="co"># PSOE</span></span>
-<span id="cb9-45"><a href=""></a>    <span class="st">"#7C316E"</span>,  <span class="co"># UP</span></span>
-<span id="cb9-46"><a href=""></a>    <span class="st">"#FF9E33"</span>,  <span class="co"># ERC</span></span>
-<span id="cb9-47"><a href=""></a>    <span class="st">"#03CFB5"</span>,  <span class="co"># EH-BILDU</span></span>
-<span id="cb9-48"><a href=""></a>    <span class="st">"#53FF53"</span>,  <span class="co"># VOX</span></span>
-<span id="cb9-49"><a href=""></a>    <span class="st">"#C0C0C0"</span>   <span class="co"># OTHER</span></span>
-<span id="cb9-50"><a href=""></a>  )</span>
-<span id="cb9-51"><a href=""></a>)</span>
-<span id="cb9-52"><a href=""></a></span>
-<span id="cb9-53"><a href=""></a>data_surveys_filtered <span class="ot">&lt;-</span> surveys <span class="sc">%&gt;%</span></span>
-<span id="cb9-54"><a href=""></a>  <span class="fu">filter</span>(date_elec <span class="sc">==</span> target_date_survey) <span class="sc">%&gt;%</span></span>
-<span id="cb9-55"><a href=""></a>  <span class="fu">group_by</span>(party_name) <span class="sc">%&gt;%</span></span>
-<span id="cb9-56"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb9-57"><a href=""></a>    <span class="at">vote_intention =</span> <span class="fu">mean</span>(vote_intention, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb9-58"><a href=""></a>    <span class="at">n_polls =</span> <span class="fu">n</span>()</span>
-<span id="cb9-59"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-60"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(vote_intention)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-61"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">vote_share_intention =</span> vote_intention <span class="sc">/</span> <span class="fu">sum</span>(vote_intention) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-62"><a href=""></a>  <span class="fu">left_join</span>(party_mapping, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"party_name"</span> <span class="ot">=</span> <span class="st">"survey_name"</span>))</span>
-<span id="cb9-63"><a href=""></a></span>
-<span id="cb9-64"><a href=""></a>data_election <span class="ot">&lt;-</span> election_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-65"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">date_elec =</span> <span class="fu">as.Date</span>(<span class="fu">paste</span>(anno, mes, <span class="st">"01"</span>, <span class="at">sep =</span> <span class="st">"-"</span>)))</span>
-<span id="cb9-66"><a href=""></a>data_election_filtered <span class="ot">&lt;-</span> data_election <span class="sc">%&gt;%</span></span>
-<span id="cb9-67"><a href=""></a>  <span class="fu">filter</span>(date_elec <span class="sc">==</span> target_date_election) <span class="sc">%&gt;%</span></span>
-<span id="cb9-68"><a href=""></a>  <span class="fu">group_by</span>(siglas) <span class="sc">%&gt;%</span></span>
-<span id="cb9-69"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb9-70"><a href=""></a>    <span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-71"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-72"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">vote_share_actual =</span> total_votes <span class="sc">/</span> <span class="fu">sum</span>(total_votes) <span class="sc">*</span> <span class="dv">100</span>)</span>
-<span id="cb9-73"><a href=""></a></span>
-<span id="cb9-74"><a href=""></a><span class="co"># Merge datasets using the mapped names</span></span>
-<span id="cb9-75"><a href=""></a>comparison_data <span class="ot">&lt;-</span> data_surveys_filtered <span class="sc">%&gt;%</span></span>
-<span id="cb9-76"><a href=""></a>  <span class="fu">left_join</span>(data_election_filtered, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"election_name"</span> <span class="ot">=</span> <span class="st">"siglas"</span>))</span>
-<span id="cb9-77"><a href=""></a></span>
-<span id="cb9-78"><a href=""></a><span class="co"># Calculate errors</span></span>
-<span id="cb9-79"><a href=""></a>comparison_data <span class="ot">&lt;-</span> comparison_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-80"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-81"><a href=""></a>    <span class="at">absolute_error =</span> vote_share_intention <span class="sc">-</span> vote_share_actual,</span>
-<span id="cb9-82"><a href=""></a>    <span class="at">relative_error =</span> (vote_share_intention <span class="sc">-</span> vote_share_actual) <span class="sc">/</span> vote_share_actual <span class="sc">*</span> <span class="dv">100</span></span>
-<span id="cb9-83"><a href=""></a>  )</span>
-<span id="cb9-84"><a href=""></a></span>
-<span id="cb9-85"><a href=""></a><span class="co"># Calculate overall error metrics</span></span>
-<span id="cb9-86"><a href=""></a>error_metrics <span class="ot">&lt;-</span> comparison_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-87"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(absolute_error)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-88"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb9-89"><a href=""></a>    <span class="at">mae =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(absolute_error)),</span>
-<span id="cb9-90"><a href=""></a>    <span class="at">rmse =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(absolute_error<span class="sc">^</span><span class="dv">2</span>)),</span>
-<span id="cb9-91"><a href=""></a>    <span class="at">mean_error =</span> <span class="fu">mean</span>(absolute_error)</span>
-<span id="cb9-92"><a href=""></a>  )</span>
-<span id="cb9-93"><a href=""></a></span>
-<span id="cb9-94"><a href=""></a>error_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
-<span id="cb9-95"><a href=""></a>  comparison_data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(absolute_error)), </span>
-<span id="cb9-96"><a href=""></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(display_name, <span class="sc">-</span>vote_share_actual))</span>
-<span id="cb9-97"><a href=""></a>) <span class="sc">+</span></span>
-<span id="cb9-98"><a href=""></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">y =</span> absolute_error), <span class="at">fill =</span> comparison_data<span class="sc">$</span>party_color[<span class="sc">!</span><span class="fu">is.na</span>(comparison_data<span class="sc">$</span>absolute_error)]) <span class="sc">+</span></span>
-<span id="cb9-99"><a href=""></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb9-100"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb9-101"><a href=""></a>    <span class="at">title =</span> <span class="st">"Polling Error by Party - November 2019 Election"</span>,</span>
-<span id="cb9-102"><a href=""></a>    <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"Mean Absolute Error:"</span>, <span class="fu">round</span>(error_metrics<span class="sc">$</span>mae, <span class="dv">2</span>), <span class="st">"%"</span>),</span>
-<span id="cb9-103"><a href=""></a>    <span class="at">x =</span> <span class="st">"Party"</span>,</span>
-<span id="cb9-104"><a href=""></a>    <span class="at">y =</span> <span class="st">"Error in Vote Share (Prediction - Actual) %"</span></span>
-<span id="cb9-105"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-106"><a href=""></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb9-107"><a href=""></a>  <span class="fu">theme</span>(</span>
-<span id="cb9-108"><a href=""></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb9-109"><a href=""></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"gray90"</span>),</span>
-<span id="cb9-110"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"gray95"</span>)</span>
-<span id="cb9-111"><a href=""></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a><span class="co"># Set target dates - Changed to November election</span></span>
+<span id="cb14-2"><a href=""></a>target_date_survey <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2019-11-10"</span>)  <span class="co"># November election date</span></span>
+<span id="cb14-3"><a href=""></a>target_date_election <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2019-11-01"</span>)  <span class="co"># First of November</span></span>
+<span id="cb14-4"><a href=""></a></span>
+<span id="cb14-5"><a href=""></a><span class="co"># Create party name mapping with display names and colors</span></span>
+<span id="cb14-6"><a href=""></a>party_mapping <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-7"><a href=""></a>  <span class="at">survey_name =</span> <span class="fu">c</span>(</span>
+<span id="cb14-8"><a href=""></a>    <span class="st">"CIUDADANOS"</span>,</span>
+<span id="cb14-9"><a href=""></a>    <span class="st">"PARTIDO NACIONALISTA VASCO"</span>,</span>
+<span id="cb14-10"><a href=""></a>    <span class="st">"PARTIDO POPULAR"</span>,</span>
+<span id="cb14-11"><a href=""></a>    <span class="st">"PARTIDO SOCIALISTA OBRERO ESPAÑOL"</span>,</span>
+<span id="cb14-12"><a href=""></a>    <span class="st">"UNIDAS PODEMOS - IU"</span>,</span>
+<span id="cb14-13"><a href=""></a>    <span class="st">"ESQUERRA REPUBLICANA DE CATALUNYA"</span>,</span>
+<span id="cb14-14"><a href=""></a>    <span class="st">"EH-BILDU"</span>,</span>
+<span id="cb14-15"><a href=""></a>    <span class="st">"VOX"</span>,</span>
+<span id="cb14-16"><a href=""></a>    <span class="st">"OTHER"</span></span>
+<span id="cb14-17"><a href=""></a>  ),</span>
+<span id="cb14-18"><a href=""></a>  <span class="at">election_name =</span> <span class="fu">c</span>(</span>
+<span id="cb14-19"><a href=""></a>    <span class="st">"CS"</span>,</span>
+<span id="cb14-20"><a href=""></a>    <span class="st">"EAJ-PNV"</span>,</span>
+<span id="cb14-21"><a href=""></a>    <span class="st">"PP"</span>,</span>
+<span id="cb14-22"><a href=""></a>    <span class="st">"PSOE"</span>,</span>
+<span id="cb14-23"><a href=""></a>    <span class="st">"UP"</span>,</span>
+<span id="cb14-24"><a href=""></a>    <span class="st">"ERC"</span>,</span>
+<span id="cb14-25"><a href=""></a>    <span class="st">"EH-BILDU"</span>,</span>
+<span id="cb14-26"><a href=""></a>    <span class="st">"VOX"</span>,</span>
+<span id="cb14-27"><a href=""></a>    <span class="st">"OTHER"</span></span>
+<span id="cb14-28"><a href=""></a>  ),</span>
+<span id="cb14-29"><a href=""></a>  <span class="at">display_name =</span> <span class="fu">c</span>(</span>
+<span id="cb14-30"><a href=""></a>    <span class="st">"CS"</span>,</span>
+<span id="cb14-31"><a href=""></a>    <span class="st">"EAJ-PNV"</span>,</span>
+<span id="cb14-32"><a href=""></a>    <span class="st">"PP"</span>,</span>
+<span id="cb14-33"><a href=""></a>    <span class="st">"PSOE"</span>,</span>
+<span id="cb14-34"><a href=""></a>    <span class="st">"UP"</span>,</span>
+<span id="cb14-35"><a href=""></a>    <span class="st">"ERC"</span>,</span>
+<span id="cb14-36"><a href=""></a>    <span class="st">"EH-BILDU"</span>,</span>
+<span id="cb14-37"><a href=""></a>    <span class="st">"VOX"</span>,</span>
+<span id="cb14-38"><a href=""></a>    <span class="st">"OTHER"</span></span>
+<span id="cb14-39"><a href=""></a>  ),</span>
+<span id="cb14-40"><a href=""></a>  <span class="at">party_color =</span> <span class="fu">c</span>(</span>
+<span id="cb14-41"><a href=""></a>    <span class="st">"#E9521D"</span>,  <span class="co"># CS</span></span>
+<span id="cb14-42"><a href=""></a>    <span class="st">"#04B82B"</span>,  <span class="co"># EAJ-PNV</span></span>
+<span id="cb14-43"><a href=""></a>    <span class="st">"#41A4F5"</span>,  <span class="co"># PP</span></span>
+<span id="cb14-44"><a href=""></a>    <span class="st">"#F93D46"</span>,  <span class="co"># PSOE</span></span>
+<span id="cb14-45"><a href=""></a>    <span class="st">"#7C316E"</span>,  <span class="co"># UP</span></span>
+<span id="cb14-46"><a href=""></a>    <span class="st">"#FF9E33"</span>,  <span class="co"># ERC</span></span>
+<span id="cb14-47"><a href=""></a>    <span class="st">"#03CFB5"</span>,  <span class="co"># EH-BILDU</span></span>
+<span id="cb14-48"><a href=""></a>    <span class="st">"#53FF53"</span>,  <span class="co"># VOX</span></span>
+<span id="cb14-49"><a href=""></a>    <span class="st">"#C0C0C0"</span>   <span class="co"># OTHER</span></span>
+<span id="cb14-50"><a href=""></a>  )</span>
+<span id="cb14-51"><a href=""></a>)</span>
+<span id="cb14-52"><a href=""></a></span>
+<span id="cb14-53"><a href=""></a>data_surveys_filtered <span class="ot">&lt;-</span> surveys <span class="sc">%&gt;%</span></span>
+<span id="cb14-54"><a href=""></a>  <span class="fu">filter</span>(date_elec <span class="sc">==</span> target_date_survey) <span class="sc">%&gt;%</span></span>
+<span id="cb14-55"><a href=""></a>  <span class="fu">group_by</span>(party_name) <span class="sc">%&gt;%</span></span>
+<span id="cb14-56"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-57"><a href=""></a>    <span class="at">vote_intention =</span> <span class="fu">mean</span>(vote_intention, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-58"><a href=""></a>    <span class="at">n_polls =</span> <span class="fu">n</span>()</span>
+<span id="cb14-59"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb14-60"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(vote_intention)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-61"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">vote_share_intention =</span> vote_intention <span class="sc">/</span> <span class="fu">sum</span>(vote_intention) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-62"><a href=""></a>  <span class="fu">left_join</span>(party_mapping, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"party_name"</span> <span class="ot">=</span> <span class="st">"survey_name"</span>))</span>
+<span id="cb14-63"><a href=""></a></span>
+<span id="cb14-64"><a href=""></a>data_election <span class="ot">&lt;-</span> election_data <span class="sc">%&gt;%</span></span>
+<span id="cb14-65"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">date_elec =</span> <span class="fu">as.Date</span>(<span class="fu">paste</span>(anno, mes, <span class="st">"01"</span>, <span class="at">sep =</span> <span class="st">"-"</span>)))</span>
+<span id="cb14-66"><a href=""></a>data_election_filtered <span class="ot">&lt;-</span> data_election <span class="sc">%&gt;%</span></span>
+<span id="cb14-67"><a href=""></a>  <span class="fu">filter</span>(date_elec <span class="sc">==</span> target_date_election) <span class="sc">%&gt;%</span></span>
+<span id="cb14-68"><a href=""></a>  <span class="fu">group_by</span>(siglas) <span class="sc">%&gt;%</span></span>
+<span id="cb14-69"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-70"><a href=""></a>    <span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-71"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb14-72"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">vote_share_actual =</span> total_votes <span class="sc">/</span> <span class="fu">sum</span>(total_votes) <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb14-73"><a href=""></a></span>
+<span id="cb14-74"><a href=""></a><span class="co"># Merge datasets using the mapped names</span></span>
+<span id="cb14-75"><a href=""></a>comparison_data <span class="ot">&lt;-</span> data_surveys_filtered <span class="sc">%&gt;%</span></span>
+<span id="cb14-76"><a href=""></a>  <span class="fu">left_join</span>(data_election_filtered, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"election_name"</span> <span class="ot">=</span> <span class="st">"siglas"</span>))</span>
+<span id="cb14-77"><a href=""></a></span>
+<span id="cb14-78"><a href=""></a><span class="co"># Calculate errors</span></span>
+<span id="cb14-79"><a href=""></a>comparison_data <span class="ot">&lt;-</span> comparison_data <span class="sc">%&gt;%</span></span>
+<span id="cb14-80"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-81"><a href=""></a>    <span class="at">absolute_error =</span> vote_share_intention <span class="sc">-</span> vote_share_actual,</span>
+<span id="cb14-82"><a href=""></a>    <span class="at">relative_error =</span> (vote_share_intention <span class="sc">-</span> vote_share_actual) <span class="sc">/</span> vote_share_actual <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb14-83"><a href=""></a>  )</span>
+<span id="cb14-84"><a href=""></a></span>
+<span id="cb14-85"><a href=""></a><span class="co"># Calculate overall error metrics</span></span>
+<span id="cb14-86"><a href=""></a>error_metrics <span class="ot">&lt;-</span> comparison_data <span class="sc">%&gt;%</span></span>
+<span id="cb14-87"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(absolute_error)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-88"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-89"><a href=""></a>    <span class="at">mae =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(absolute_error)),</span>
+<span id="cb14-90"><a href=""></a>    <span class="at">rmse =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(absolute_error<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb14-91"><a href=""></a>    <span class="at">mean_error =</span> <span class="fu">mean</span>(absolute_error)</span>
+<span id="cb14-92"><a href=""></a>  )</span>
+<span id="cb14-93"><a href=""></a></span>
+<span id="cb14-94"><a href=""></a>error_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb14-95"><a href=""></a>  comparison_data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(absolute_error)), </span>
+<span id="cb14-96"><a href=""></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(display_name, <span class="sc">-</span>vote_share_actual))</span>
+<span id="cb14-97"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb14-98"><a href=""></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">y =</span> absolute_error), <span class="at">fill =</span> comparison_data<span class="sc">$</span>party_color[<span class="sc">!</span><span class="fu">is.na</span>(comparison_data<span class="sc">$</span>absolute_error)]) <span class="sc">+</span></span>
+<span id="cb14-99"><a href=""></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb14-100"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb14-101"><a href=""></a>    <span class="at">title =</span> <span class="st">"Polling Error by Party - November 2019 Election"</span>,</span>
+<span id="cb14-102"><a href=""></a>    <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"Mean Absolute Error:"</span>, <span class="fu">round</span>(error_metrics<span class="sc">$</span>mae, <span class="dv">2</span>), <span class="st">"%"</span>),</span>
+<span id="cb14-103"><a href=""></a>    <span class="at">x =</span> <span class="st">"Party"</span>,</span>
+<span id="cb14-104"><a href=""></a>    <span class="at">y =</span> <span class="st">"Error in Vote Share (Prediction - Actual) %"</span></span>
+<span id="cb14-105"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb14-106"><a href=""></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb14-107"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb14-108"><a href=""></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb14-109"><a href=""></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"gray90"</span>),</span>
+<span id="cb14-110"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"gray95"</span>)</span>
+<span id="cb14-111"><a href=""></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -974,69 +985,69 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <section id="exercise-6" class="slide level2">
 <h2>Exercise 6</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a>election_data_clean <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span></span>
-<span id="cb14-2"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(partido_2) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(censo) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(num_votos)) <span class="sc">|&gt;</span></span>
-<span id="cb14-3"><a href=""></a>  <span class="fu">filter</span>(censo <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> num_votos <span class="sc">&gt;=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
-<span id="cb14-4"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">partido_2 =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_trim</span>(partido_2)))</span>
-<span id="cb14-5"><a href=""></a></span>
-<span id="cb14-6"><a href=""></a>surveys_clean <span class="ot">&lt;-</span> surveys <span class="sc">|&gt;</span></span>
-<span id="cb14-7"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(vote_intention) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(turnout)) <span class="sc">|&gt;</span></span>
-<span id="cb14-8"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb14-9"><a href=""></a>    <span class="at">vote_intention =</span> <span class="fu">ifelse</span>(vote_intention <span class="sc">&gt;</span> <span class="dv">1</span>, vote_intention <span class="sc">/</span> <span class="dv">100</span>, vote_intention),</span>
-<span id="cb14-10"><a href=""></a>    <span class="at">turnout =</span> <span class="fu">ifelse</span>(turnout <span class="sc">&gt;</span> <span class="dv">1</span>, turnout <span class="sc">/</span> <span class="dv">100</span>, turnout),</span>
-<span id="cb14-11"><a href=""></a>    <span class="at">party_name =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_trim</span>(party_name))</span>
-<span id="cb14-12"><a href=""></a>  )</span>
-<span id="cb14-13"><a href=""></a></span>
-<span id="cb14-14"><a href=""></a></span>
-<span id="cb14-15"><a href=""></a>surveys_clean <span class="ot">&lt;-</span> surveys_clean <span class="sc">|&gt;</span></span>
-<span id="cb14-16"><a href=""></a>  <span class="fu">group_by</span>(party_name, pollster) <span class="sc">|&gt;</span></span>
-<span id="cb14-17"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb14-18"><a href=""></a>    <span class="at">avg_vote_intention =</span> <span class="fu">mean</span>(vote_intention, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-19"><a href=""></a>    <span class="at">avg_turnout =</span> <span class="fu">mean</span>(turnout, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-20"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb14-21"><a href=""></a>  )</span>
-<span id="cb14-22"><a href=""></a></span>
-<span id="cb14-23"><a href=""></a>merged_data <span class="ot">&lt;-</span> election_data_clean<span class="sc">|&gt;</span></span>
-<span id="cb14-24"><a href=""></a>  <span class="fu">inner_join</span>(surveys_clean, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"partido_2"</span> <span class="ot">=</span> <span class="st">"party_name"</span>),<span class="at">relationship =</span> <span class="st">"many-to-many"</span>)</span>
-<span id="cb14-25"><a href=""></a></span>
-<span id="cb14-26"><a href=""></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
-<span id="cb14-27"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb14-28"><a href=""></a>    <span class="at">errors =</span> <span class="fu">abs</span>(avg_vote_intention <span class="sc">*</span> <span class="dv">100</span> <span class="sc">-</span> (num_votos <span class="sc">/</span> censo <span class="sc">*</span> <span class="dv">100</span>))</span>
-<span id="cb14-29"><a href=""></a>  )</span>
-<span id="cb14-30"><a href=""></a></span>
-<span id="cb14-31"><a href=""></a>pollster_performance <span class="ot">&lt;-</span> merged_data<span class="sc">%&gt;%</span></span>
-<span id="cb14-32"><a href=""></a>  <span class="fu">group_by</span>(pollster) <span class="sc">%&gt;%</span></span>
-<span id="cb14-33"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb14-34"><a href=""></a>    <span class="at">mean_error =</span> <span class="fu">mean</span>(errors, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-35"><a href=""></a>    <span class="at">max_error =</span> <span class="fu">max</span>(errors, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-36"><a href=""></a>    <span class="at">total_error =</span> <span class="fu">sum</span>(errors, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb14-37"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb14-38"><a href=""></a>  )</span>
-<span id="cb14-39"><a href=""></a></span>
-<span id="cb14-40"><a href=""></a>best_pollsters <span class="ot">&lt;-</span> pollster_performance <span class="sc">|&gt;</span></span>
-<span id="cb14-41"><a href=""></a>  <span class="fu">arrange</span>(mean_error) <span class="sc">|&gt;</span></span>
-<span id="cb14-42"><a href=""></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
-<span id="cb14-43"><a href=""></a></span>
-<span id="cb14-44"><a href=""></a>worst_pollsters <span class="ot">&lt;-</span> pollster_performance <span class="sc">|&gt;</span></span>
-<span id="cb14-45"><a href=""></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean_error))<span class="sc">|&gt;</span></span>
-<span id="cb14-46"><a href=""></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
-<span id="cb14-47"><a href=""></a></span>
-<span id="cb14-48"><a href=""></a>combined_pollsters <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
-<span id="cb14-49"><a href=""></a>  best_pollsters <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">category =</span> <span class="st">"Best"</span>),</span>
-<span id="cb14-50"><a href=""></a>  worst_pollsters <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">category =</span> <span class="st">"Worst"</span>)</span>
-<span id="cb14-51"><a href=""></a>)</span>
-<span id="cb14-52"><a href=""></a></span>
-<span id="cb14-53"><a href=""></a>combined_pollsters <span class="ot">&lt;-</span> combined_pollsters <span class="sc">%&gt;%</span></span>
-<span id="cb14-54"><a href=""></a>  <span class="fu">arrange</span>(mean_error) </span>
-<span id="cb14-55"><a href=""></a></span>
-<span id="cb14-56"><a href=""></a>pollster_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(combined_pollsters, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(pollster, <span class="fu">desc</span>(mean_error)), <span class="at">y =</span> mean_error)) <span class="sc">+</span></span>
-<span id="cb14-57"><a href=""></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>,<span class="at">fill=</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
-<span id="cb14-58"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb14-59"><a href=""></a>    <span class="at">title =</span> <span class="st">"Best and Worst Pollsters by Mean Error"</span>,</span>
-<span id="cb14-60"><a href=""></a>    <span class="at">x =</span> <span class="st">"Pollster"</span>,</span>
-<span id="cb14-61"><a href=""></a>    <span class="at">y =</span> <span class="st">"Mean Error (Percentage Points)"</span>,</span>
-<span id="cb14-62"><a href=""></a>  )  <span class="sc">+</span> <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
-<span id="cb14-63"><a href=""></a>  <span class="fu">coord_flip</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a>election_data_clean <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(partido_2) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(censo) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(num_votos)) <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a href=""></a>  <span class="fu">filter</span>(censo <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> num_votos <span class="sc">&gt;=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">partido_2 =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_trim</span>(partido_2)))</span>
+<span id="cb19-5"><a href=""></a></span>
+<span id="cb19-6"><a href=""></a>surveys_clean <span class="ot">&lt;-</span> surveys <span class="sc">|&gt;</span></span>
+<span id="cb19-7"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(vote_intention) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(turnout)) <span class="sc">|&gt;</span></span>
+<span id="cb19-8"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-9"><a href=""></a>    <span class="at">vote_intention =</span> <span class="fu">ifelse</span>(vote_intention <span class="sc">&gt;</span> <span class="dv">1</span>, vote_intention <span class="sc">/</span> <span class="dv">100</span>, vote_intention),</span>
+<span id="cb19-10"><a href=""></a>    <span class="at">turnout =</span> <span class="fu">ifelse</span>(turnout <span class="sc">&gt;</span> <span class="dv">1</span>, turnout <span class="sc">/</span> <span class="dv">100</span>, turnout),</span>
+<span id="cb19-11"><a href=""></a>    <span class="at">party_name =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_trim</span>(party_name))</span>
+<span id="cb19-12"><a href=""></a>  )</span>
+<span id="cb19-13"><a href=""></a></span>
+<span id="cb19-14"><a href=""></a></span>
+<span id="cb19-15"><a href=""></a>surveys_clean <span class="ot">&lt;-</span> surveys_clean <span class="sc">|&gt;</span></span>
+<span id="cb19-16"><a href=""></a>  <span class="fu">group_by</span>(party_name, pollster) <span class="sc">|&gt;</span></span>
+<span id="cb19-17"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb19-18"><a href=""></a>    <span class="at">avg_vote_intention =</span> <span class="fu">mean</span>(vote_intention, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-19"><a href=""></a>    <span class="at">avg_turnout =</span> <span class="fu">mean</span>(turnout, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-20"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb19-21"><a href=""></a>  )</span>
+<span id="cb19-22"><a href=""></a></span>
+<span id="cb19-23"><a href=""></a>merged_data <span class="ot">&lt;-</span> election_data_clean<span class="sc">|&gt;</span></span>
+<span id="cb19-24"><a href=""></a>  <span class="fu">inner_join</span>(surveys_clean, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"partido_2"</span> <span class="ot">=</span> <span class="st">"party_name"</span>),<span class="at">relationship =</span> <span class="st">"many-to-many"</span>)</span>
+<span id="cb19-25"><a href=""></a></span>
+<span id="cb19-26"><a href=""></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">|&gt;</span></span>
+<span id="cb19-27"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-28"><a href=""></a>    <span class="at">errors =</span> <span class="fu">abs</span>(avg_vote_intention <span class="sc">*</span> <span class="dv">100</span> <span class="sc">-</span> (num_votos <span class="sc">/</span> censo <span class="sc">*</span> <span class="dv">100</span>))</span>
+<span id="cb19-29"><a href=""></a>  )</span>
+<span id="cb19-30"><a href=""></a></span>
+<span id="cb19-31"><a href=""></a>pollster_performance <span class="ot">&lt;-</span> merged_data<span class="sc">%&gt;%</span></span>
+<span id="cb19-32"><a href=""></a>  <span class="fu">group_by</span>(pollster) <span class="sc">%&gt;%</span></span>
+<span id="cb19-33"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb19-34"><a href=""></a>    <span class="at">mean_error =</span> <span class="fu">mean</span>(errors, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-35"><a href=""></a>    <span class="at">max_error =</span> <span class="fu">max</span>(errors, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-36"><a href=""></a>    <span class="at">total_error =</span> <span class="fu">sum</span>(errors, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-37"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb19-38"><a href=""></a>  )</span>
+<span id="cb19-39"><a href=""></a></span>
+<span id="cb19-40"><a href=""></a>best_pollsters <span class="ot">&lt;-</span> pollster_performance <span class="sc">|&gt;</span></span>
+<span id="cb19-41"><a href=""></a>  <span class="fu">arrange</span>(mean_error) <span class="sc">|&gt;</span></span>
+<span id="cb19-42"><a href=""></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb19-43"><a href=""></a></span>
+<span id="cb19-44"><a href=""></a>worst_pollsters <span class="ot">&lt;-</span> pollster_performance <span class="sc">|&gt;</span></span>
+<span id="cb19-45"><a href=""></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean_error))<span class="sc">|&gt;</span></span>
+<span id="cb19-46"><a href=""></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb19-47"><a href=""></a></span>
+<span id="cb19-48"><a href=""></a>combined_pollsters <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb19-49"><a href=""></a>  best_pollsters <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">category =</span> <span class="st">"Best"</span>),</span>
+<span id="cb19-50"><a href=""></a>  worst_pollsters <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">category =</span> <span class="st">"Worst"</span>)</span>
+<span id="cb19-51"><a href=""></a>)</span>
+<span id="cb19-52"><a href=""></a></span>
+<span id="cb19-53"><a href=""></a>combined_pollsters <span class="ot">&lt;-</span> combined_pollsters <span class="sc">%&gt;%</span></span>
+<span id="cb19-54"><a href=""></a>  <span class="fu">arrange</span>(mean_error) </span>
+<span id="cb19-55"><a href=""></a></span>
+<span id="cb19-56"><a href=""></a>pollster_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(combined_pollsters, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(pollster, <span class="fu">desc</span>(mean_error)), <span class="at">y =</span> mean_error)) <span class="sc">+</span></span>
+<span id="cb19-57"><a href=""></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>,<span class="at">fill=</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb19-58"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-59"><a href=""></a>    <span class="at">title =</span> <span class="st">"Best and Worst Pollsters by Mean Error"</span>,</span>
+<span id="cb19-60"><a href=""></a>    <span class="at">x =</span> <span class="st">"Pollster"</span>,</span>
+<span id="cb19-61"><a href=""></a>    <span class="at">y =</span> <span class="st">"Mean Error (Percentage Points)"</span>,</span>
+<span id="cb19-62"><a href=""></a>  )  <span class="sc">+</span> <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb19-63"><a href=""></a>  <span class="fu">coord_flip</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -1047,133 +1058,131 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <h2>Original exercise 1: Dorling cartogram</h2>
 <h3 id="first-steps">First steps</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a><span class="co"># Filter election_data</span></span>
-<span id="cb15-2"><a href=""></a></span>
-<span id="cb15-3"><a href=""></a>elections_1911 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
-<span id="cb15-4"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span> <span class="sc">&amp;</span> mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb15-5"><a href=""></a>  <span class="fu">select</span>(municipio, cod_mun, codigo_provincia, num_votos, siglas, partido, partido_2)</span>
-<span id="cb15-6"><a href=""></a></span>
-<span id="cb15-7"><a href=""></a>winners_prov <span class="ot">&lt;-</span> elections_1911 <span class="sc">|&gt;</span> </span>
-<span id="cb15-8"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia, siglas) <span class="sc">|&gt;</span>  </span>
-<span id="cb15-9"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">votos_totales =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb15-10"><a href=""></a>  <span class="fu">slice_max</span>(votos_totales)</span>
-<span id="cb15-11"><a href=""></a></span>
-<span id="cb15-12"><a href=""></a><span class="co"># Prepare geospatial data:</span></span>
-<span id="cb15-13"><a href=""></a></span>
-<span id="cb15-14"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">esp_get_prov</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb15-15"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">provincia =</span> prov.shortname.en) <span class="sc">|&gt;</span> </span>
-<span id="cb15-16"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">codigo_provincia =</span> cpro) <span class="sc">|&gt;</span> </span>
-<span id="cb15-17"><a href=""></a>  <span class="fu">select</span>(provincia, codigo_provincia)</span>
-<span id="cb15-18"><a href=""></a></span>
-<span id="cb15-19"><a href=""></a><span class="co"># Set Mercator projection:</span></span>
-<span id="cb15-20"><a href=""></a></span>
-<span id="cb15-21"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(provinces, <span class="dv">3857</span>)</span>
-<span id="cb15-22"><a href=""></a></span>
-<span id="cb15-23"><a href=""></a><span class="co"># Population data:</span></span>
-<span id="cb15-24"><a href=""></a></span>
-<span id="cb15-25"><a href=""></a>pop_prov <span class="ot">&lt;-</span> mapSpain<span class="sc">::</span>pobmun19 <span class="sc">|&gt;</span> </span>
-<span id="cb15-26"><a href=""></a>  <span class="fu">rename</span>(<span class="at">codigo_provincia =</span> cpro) <span class="sc">|&gt;</span> </span>
-<span id="cb15-27"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia) <span class="sc">|&gt;</span> </span>
-<span id="cb15-28"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">n_pop =</span> <span class="fu">sum</span>(pob19))</span>
-<span id="cb15-29"><a href=""></a></span>
-<span id="cb15-30"><a href=""></a><span class="co"># Join all dataframes:</span></span>
-<span id="cb15-31"><a href=""></a></span>
-<span id="cb15-32"><a href=""></a>pop_prov <span class="ot">&lt;-</span> provinces <span class="sc">|&gt;</span> </span>
-<span id="cb15-33"><a href=""></a>  <span class="fu">left_join</span>(pop_prov, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb15-34"><a href=""></a>  <span class="fu">left_join</span>(winners_prov, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="co"># Filter election_data</span></span>
+<span id="cb20-2"><a href=""></a>election_data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/processed/election_data.rds"</span>)</span>
+<span id="cb20-3"><a href=""></a></span>
+<span id="cb20-4"><a href=""></a>elections_1911 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb20-5"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span> <span class="sc">&amp;</span> mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-6"><a href=""></a>  <span class="fu">select</span>(municipio, cod_mun, codigo_provincia, num_votos, siglas, partido, partido_2)</span>
+<span id="cb20-7"><a href=""></a></span>
+<span id="cb20-8"><a href=""></a>winners_prov <span class="ot">&lt;-</span> elections_1911 <span class="sc">|&gt;</span> </span>
+<span id="cb20-9"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia, siglas) <span class="sc">|&gt;</span>  </span>
+<span id="cb20-10"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">votos_totales =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb20-11"><a href=""></a>  <span class="fu">slice_max</span>(votos_totales)</span>
+<span id="cb20-12"><a href=""></a></span>
+<span id="cb20-13"><a href=""></a><span class="co"># Prepare geospatial data:</span></span>
+<span id="cb20-14"><a href=""></a></span>
+<span id="cb20-15"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">esp_get_prov</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb20-16"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">provincia =</span> prov.shortname.en) <span class="sc">|&gt;</span> </span>
+<span id="cb20-17"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">codigo_provincia =</span> cpro) <span class="sc">|&gt;</span> </span>
+<span id="cb20-18"><a href=""></a>  <span class="fu">select</span>(provincia, codigo_provincia)</span>
+<span id="cb20-19"><a href=""></a></span>
+<span id="cb20-20"><a href=""></a><span class="co"># Set Mercator projection:</span></span>
+<span id="cb20-21"><a href=""></a></span>
+<span id="cb20-22"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(provinces, <span class="dv">3857</span>)</span>
+<span id="cb20-23"><a href=""></a></span>
+<span id="cb20-24"><a href=""></a><span class="co"># Population data:</span></span>
+<span id="cb20-25"><a href=""></a></span>
+<span id="cb20-26"><a href=""></a>pop_prov <span class="ot">&lt;-</span> mapSpain<span class="sc">::</span>pobmun19 <span class="sc">|&gt;</span> </span>
+<span id="cb20-27"><a href=""></a>  <span class="fu">rename</span>(<span class="at">codigo_provincia =</span> cpro) <span class="sc">|&gt;</span> </span>
+<span id="cb20-28"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia) <span class="sc">|&gt;</span> </span>
+<span id="cb20-29"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">n_pop =</span> <span class="fu">sum</span>(pob19))</span>
+<span id="cb20-30"><a href=""></a></span>
+<span id="cb20-31"><a href=""></a><span class="co"># Join all dataframes:</span></span>
+<span id="cb20-32"><a href=""></a></span>
+<span id="cb20-33"><a href=""></a>pop_prov <span class="ot">&lt;-</span> provinces <span class="sc">|&gt;</span> </span>
+<span id="cb20-34"><a href=""></a>  <span class="fu">left_join</span>(pop_prov, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-35"><a href=""></a>  <span class="fu">left_join</span>(winners_prov, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <h3 id="create-the-cartogram">Create the cartogram</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a>pop_prov_cartog <span class="ot">&lt;-</span> <span class="fu">cartogram_dorling</span>(pop_prov, </span>
-<span id="cb16-2"><a href=""></a>                                     <span class="at">weight =</span> <span class="st">"n_pop"</span>)</span>
-<span id="cb16-3"><a href=""></a></span>
-<span id="cb16-4"><a href=""></a>pop_prov_cartog <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(pop_prov_cartog) <span class="sc">+</span></span>
-<span id="cb16-5"><a href=""></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> siglas)) <span class="sc">+</span></span>
-<span id="cb16-6"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> party_colors,</span>
-<span id="cb16-7"><a href=""></a>                    <span class="at">name =</span> <span class="st">"Party"</span>,</span>
-<span id="cb16-8"><a href=""></a>                    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"PSOE"</span>, <span class="st">"PP"</span>, <span class="st">"VOX"</span>, <span class="st">"ERC"</span>, <span class="st">"EAJ-PNV"</span>, <span class="st">"OTHER"</span>)) <span class="sc">+</span></span>
-<span id="cb16-9"><a href=""></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb16-10"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"2019 November Elections: Most voted party by province"</span>,</span>
-<span id="cb16-11"><a href=""></a>       <span class="at">subtitle =</span> <span class="st">"(The size of each circle represents the population of each province)"</span>) <span class="sc">+</span></span>
-<span id="cb16-12"><a href=""></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>,</span>
-<span id="cb16-13"><a href=""></a>                                  <span class="at">margin =</span> <span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>), <span class="st">"cm"</span>),</span>
-<span id="cb16-14"><a href=""></a>                                  <span class="at">size =</span> <span class="dv">18</span>,</span>
-<span id="cb16-15"><a href=""></a>                                  <span class="at">family =</span> <span class="st">"rob_cond"</span>),</span>
-<span id="cb16-16"><a href=""></a>        <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
-<span id="cb16-17"><a href=""></a>                                     <span class="at">size =</span> <span class="dv">14</span>),</span>
-<span id="cb16-18"><a href=""></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>,</span>
-<span id="cb16-19"><a href=""></a>                                    <span class="at">family =</span> <span class="st">"rob_cond"</span>, </span>
-<span id="cb16-20"><a href=""></a>                                    <span class="at">size =</span> <span class="dv">15</span>),</span>
-<span id="cb16-21"><a href=""></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"rob_cond"</span>, </span>
-<span id="cb16-22"><a href=""></a>                                    <span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a>pop_prov_cartog <span class="ot">&lt;-</span> <span class="fu">cartogram_dorling</span>(pop_prov, </span>
+<span id="cb21-2"><a href=""></a>                                     <span class="at">weight =</span> <span class="st">"n_pop"</span>)</span>
+<span id="cb21-3"><a href=""></a></span>
+<span id="cb21-4"><a href=""></a>pop_prov_cartog <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(pop_prov_cartog) <span class="sc">+</span></span>
+<span id="cb21-5"><a href=""></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> siglas)) <span class="sc">+</span></span>
+<span id="cb21-6"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> party_colors,</span>
+<span id="cb21-7"><a href=""></a>                    <span class="at">name =</span> <span class="st">"Party"</span>,</span>
+<span id="cb21-8"><a href=""></a>                    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"PSOE"</span>, <span class="st">"PP"</span>, <span class="st">"VOX"</span>, <span class="st">"ERC"</span>, <span class="st">"EAJ-PNV"</span>, <span class="st">"OTHER"</span>)) <span class="sc">+</span></span>
+<span id="cb21-9"><a href=""></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb21-10"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"2019 November Elections: Most voted party by province"</span>,</span>
+<span id="cb21-11"><a href=""></a>       <span class="at">subtitle =</span> <span class="st">"(The size of each circle represents the population of each province)"</span>) <span class="sc">+</span></span>
+<span id="cb21-12"><a href=""></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb21-13"><a href=""></a>                                  <span class="at">margin =</span> <span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>), <span class="st">"cm"</span>),</span>
+<span id="cb21-14"><a href=""></a>                                  <span class="at">size =</span> <span class="dv">18</span>,</span>
+<span id="cb21-15"><a href=""></a>                                  <span class="at">family =</span> <span class="st">"rob_cond"</span>),</span>
+<span id="cb21-16"><a href=""></a>        <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
+<span id="cb21-17"><a href=""></a>                                     <span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb21-18"><a href=""></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb21-19"><a href=""></a>                                    <span class="at">family =</span> <span class="st">"rob_cond"</span>, </span>
+<span id="cb21-20"><a href=""></a>                                    <span class="at">size =</span> <span class="dv">15</span>),</span>
+<span id="cb21-21"><a href=""></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"rob_cond"</span>, </span>
+<span id="cb21-22"><a href=""></a>                                    <span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 
 <img data-src="presentation_files/figure-revealjs/unnamed-chunk-29-1.png" width="1152" class="r-stretch"></section>
-<section id="original-exercise-2-parliament-plot" class="slide level2">
-<h2>Original exercise 2: Parliament plot (?)</h2>
-</section>
 <section id="original-exercise-2-income-and-populistic-voting" class="slide level2">
 <h2>Original exercise 2: Income and Populistic Voting</h2>
 <h3 id="first-steps-data-download-and-wrangling">First steps: Data download and wrangling</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a><span class="co"># source: REGDATA_v70_55_23.xlsx from :</span></span>
-<span id="cb17-2"><a href=""></a><span class="co"># https://www.bbvaresearch.com/en/publicaciones/spain-long-series-of-regional-</span></span>
-<span id="cb17-3"><a href=""></a><span class="co"># economic-and-demographic-aggregates-2023-update/</span></span>
-<span id="cb17-4"><a href=""></a></span>
-<span id="cb17-5"><a href=""></a><span class="co"># convert both datasets to long format</span></span>
-<span id="cb17-6"><a href=""></a>gdp_long <span class="ot">&lt;-</span> gdp_data <span class="sc">|&gt;</span> </span>
-<span id="cb17-7"><a href=""></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb17-8"><a href=""></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="st">'...1'</span>,</span>
-<span id="cb17-9"><a href=""></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
-<span id="cb17-10"><a href=""></a>    <span class="at">values_to =</span> <span class="st">"gdp"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb17-11"><a href=""></a>  <span class="fu">rename</span>(<span class="at">region =</span> <span class="st">'...1'</span>)</span>
-<span id="cb17-12"><a href=""></a></span>
-<span id="cb17-13"><a href=""></a>pop_long <span class="ot">&lt;-</span> pop_data <span class="sc">|&gt;</span> </span>
-<span id="cb17-14"><a href=""></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb17-15"><a href=""></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="st">'...1'</span>,</span>
-<span id="cb17-16"><a href=""></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
-<span id="cb17-17"><a href=""></a>    <span class="at">values_to =</span> <span class="st">"population"</span> ) <span class="sc">|&gt;</span> </span>
-<span id="cb17-18"><a href=""></a>  <span class="fu">rename</span>(<span class="at">region =</span> <span class="st">'...1'</span>)</span>
-<span id="cb17-19"><a href=""></a></span>
-<span id="cb17-20"><a href=""></a><span class="co"># join GDP and population data</span></span>
-<span id="cb17-21"><a href=""></a>combined_data <span class="ot">&lt;-</span> gdp_long <span class="sc">|&gt;</span> </span>
-<span id="cb17-22"><a href=""></a>  <span class="fu">left_join</span>(pop_long, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"region"</span>, <span class="st">"year"</span>))</span>
-<span id="cb17-23"><a href=""></a></span>
-<span id="cb17-24"><a href=""></a><span class="co"># calculate GDP per capita</span></span>
-<span id="cb17-25"><a href=""></a>gdp_per_capita <span class="ot">&lt;-</span> combined_data <span class="sc">|&gt;</span> </span>
-<span id="cb17-26"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">gdp_per_capita =</span> gdp <span class="sc">/</span> population) <span class="sc">|&gt;</span> </span>
-<span id="cb17-27"><a href=""></a>  <span class="fu">arrange</span>(region, year)</span>
-<span id="cb17-28"><a href=""></a></span>
-<span id="cb17-29"><a href=""></a><span class="co"># calculate growth rates (1999-2019)</span></span>
-<span id="cb17-30"><a href=""></a>growth_rates <span class="ot">&lt;-</span> gdp_per_capita <span class="sc">|&gt;</span> </span>
-<span id="cb17-31"><a href=""></a>  <span class="fu">group_by</span>(region) <span class="sc">|&gt;</span> </span>
-<span id="cb17-32"><a href=""></a>  <span class="fu">summarize</span>(</span>
-<span id="cb17-33"><a href=""></a>    <span class="at">gdp_per_capita_1999 =</span> <span class="fu">first</span>(gdp_per_capita),</span>
-<span id="cb17-34"><a href=""></a>    <span class="at">gdp_per_capita_2019 =</span> <span class="fu">last</span>(gdp_per_capita),</span>
-<span id="cb17-35"><a href=""></a>    <span class="at">total_growth =</span> (gdp_per_capita_2019 <span class="sc">/</span> gdp_per_capita_1999 <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb17-36"><a href=""></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_growth))</span>
-<span id="cb17-37"><a href=""></a></span>
-<span id="cb17-38"><a href=""></a><span class="co"># calculate national average growth</span></span>
-<span id="cb17-39"><a href=""></a>national_avg_growth <span class="ot">&lt;-</span> <span class="fu">mean</span>(growth_rates<span class="sc">$</span>total_growth)</span>
-<span id="cb17-40"><a href=""></a></span>
-<span id="cb17-41"><a href=""></a><span class="co"># add relative growth compared to national average</span></span>
-<span id="cb17-42"><a href=""></a>growth_rates <span class="ot">&lt;-</span> growth_rates <span class="sc">|&gt;</span> </span>
-<span id="cb17-43"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb17-44"><a href=""></a>    <span class="at">relative_growth =</span> total_growth <span class="sc">-</span> national_avg_growth,</span>
-<span id="cb17-45"><a href=""></a>    <span class="at">growth_category =</span> <span class="fu">if_else</span>(relative_growth <span class="sc">&gt;=</span> <span class="dv">0</span>, <span class="st">"Above Average"</span>, <span class="st">"Below Average"</span>))</span>
-<span id="cb17-46"><a href=""></a></span>
-<span id="cb17-47"><a href=""></a><span class="co"># view results</span></span>
-<span id="cb17-48"><a href=""></a><span class="fu">print</span>(<span class="st">"GDP per capita growth rates by region (1999-2019):"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a><span class="co"># source: REGDATA_v70_55_23.xlsx from :</span></span>
+<span id="cb22-2"><a href=""></a><span class="co"># https://www.bbvaresearch.com/en/publicaciones/spain-long-series-of-regional-</span></span>
+<span id="cb22-3"><a href=""></a><span class="co"># economic-and-demographic-aggregates-2023-update/</span></span>
+<span id="cb22-4"><a href=""></a></span>
+<span id="cb22-5"><a href=""></a><span class="co"># convert both datasets to long format</span></span>
+<span id="cb22-6"><a href=""></a>gdp_long <span class="ot">&lt;-</span> gdp_data <span class="sc">|&gt;</span> </span>
+<span id="cb22-7"><a href=""></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb22-8"><a href=""></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="st">'...1'</span>,</span>
+<span id="cb22-9"><a href=""></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
+<span id="cb22-10"><a href=""></a>    <span class="at">values_to =</span> <span class="st">"gdp"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb22-11"><a href=""></a>  <span class="fu">rename</span>(<span class="at">region =</span> <span class="st">'...1'</span>)</span>
+<span id="cb22-12"><a href=""></a></span>
+<span id="cb22-13"><a href=""></a>pop_long <span class="ot">&lt;-</span> pop_data <span class="sc">|&gt;</span> </span>
+<span id="cb22-14"><a href=""></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb22-15"><a href=""></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="st">'...1'</span>,</span>
+<span id="cb22-16"><a href=""></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
+<span id="cb22-17"><a href=""></a>    <span class="at">values_to =</span> <span class="st">"population"</span> ) <span class="sc">|&gt;</span> </span>
+<span id="cb22-18"><a href=""></a>  <span class="fu">rename</span>(<span class="at">region =</span> <span class="st">'...1'</span>)</span>
+<span id="cb22-19"><a href=""></a></span>
+<span id="cb22-20"><a href=""></a><span class="co"># join GDP and population data</span></span>
+<span id="cb22-21"><a href=""></a>combined_data <span class="ot">&lt;-</span> gdp_long <span class="sc">|&gt;</span> </span>
+<span id="cb22-22"><a href=""></a>  <span class="fu">left_join</span>(pop_long, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"region"</span>, <span class="st">"year"</span>))</span>
+<span id="cb22-23"><a href=""></a></span>
+<span id="cb22-24"><a href=""></a><span class="co"># calculate GDP per capita</span></span>
+<span id="cb22-25"><a href=""></a>gdp_per_capita <span class="ot">&lt;-</span> combined_data <span class="sc">|&gt;</span> </span>
+<span id="cb22-26"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">gdp_per_capita =</span> gdp <span class="sc">/</span> population) <span class="sc">|&gt;</span> </span>
+<span id="cb22-27"><a href=""></a>  <span class="fu">arrange</span>(region, year)</span>
+<span id="cb22-28"><a href=""></a></span>
+<span id="cb22-29"><a href=""></a><span class="co"># calculate growth rates (1999-2019)</span></span>
+<span id="cb22-30"><a href=""></a>growth_rates <span class="ot">&lt;-</span> gdp_per_capita <span class="sc">|&gt;</span> </span>
+<span id="cb22-31"><a href=""></a>  <span class="fu">group_by</span>(region) <span class="sc">|&gt;</span> </span>
+<span id="cb22-32"><a href=""></a>  <span class="fu">summarize</span>(</span>
+<span id="cb22-33"><a href=""></a>    <span class="at">gdp_per_capita_1999 =</span> <span class="fu">first</span>(gdp_per_capita),</span>
+<span id="cb22-34"><a href=""></a>    <span class="at">gdp_per_capita_2019 =</span> <span class="fu">last</span>(gdp_per_capita),</span>
+<span id="cb22-35"><a href=""></a>    <span class="at">total_growth =</span> (gdp_per_capita_2019 <span class="sc">/</span> gdp_per_capita_1999 <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb22-36"><a href=""></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_growth))</span>
+<span id="cb22-37"><a href=""></a></span>
+<span id="cb22-38"><a href=""></a><span class="co"># calculate national average growth</span></span>
+<span id="cb22-39"><a href=""></a>national_avg_growth <span class="ot">&lt;-</span> <span class="fu">mean</span>(growth_rates<span class="sc">$</span>total_growth)</span>
+<span id="cb22-40"><a href=""></a></span>
+<span id="cb22-41"><a href=""></a><span class="co"># add relative growth compared to national average</span></span>
+<span id="cb22-42"><a href=""></a>growth_rates <span class="ot">&lt;-</span> growth_rates <span class="sc">|&gt;</span> </span>
+<span id="cb22-43"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb22-44"><a href=""></a>    <span class="at">relative_growth =</span> total_growth <span class="sc">-</span> national_avg_growth,</span>
+<span id="cb22-45"><a href=""></a>    <span class="at">growth_category =</span> <span class="fu">if_else</span>(relative_growth <span class="sc">&gt;=</span> <span class="dv">0</span>, <span class="st">"Above Average"</span>, <span class="st">"Below Average"</span>))</span>
+<span id="cb22-46"><a href=""></a></span>
+<span id="cb22-47"><a href=""></a><span class="co"># view results</span></span>
+<span id="cb22-48"><a href=""></a><span class="fu">print</span>(<span class="st">"GDP per capita growth rates by region (1999-2019):"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "GDP per capita growth rates by region (1999-2019):"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a><span class="fu">print</span>(growth_rates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href=""></a><span class="fu">print</span>(growth_rates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 19 × 6
    region gdp_per_capita_1999 gdp_per_capita_2019 total_growth relative_growth
@@ -1199,7 +1208,7 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 19 BAL                   29.8                30.4         2.07         -21.9  
 # ℹ 1 more variable: growth_category &lt;chr&gt;</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"National average growth rate:"</span>, <span class="fu">round</span>(national_avg_growth, <span class="dv">2</span>), <span class="st">"%"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href=""></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"National average growth rate:"</span>, <span class="fu">round</span>(national_avg_growth, <span class="dv">2</span>), <span class="st">"%"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "National average growth rate: 23.97 %"</code></pre>
 </div>
@@ -1209,58 +1218,58 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 
 <h3 id="next-get-vox-election-results-and-join">Next: Get VOX election results and join</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a>election_data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/processed/election_data.rds"</span>)</span>
-<span id="cb23-2"><a href=""></a></span>
-<span id="cb23-3"><a href=""></a><span class="co"># calculate VOX results by CCAA for November 2019</span></span>
-<span id="cb23-4"><a href=""></a>vox_results_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
-<span id="cb23-5"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-6"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb23-7"><a href=""></a>    <span class="at">party_group =</span> <span class="fu">case_when</span>(</span>
-<span id="cb23-8"><a href=""></a>      partido_2 <span class="sc">==</span> <span class="st">"VOX"</span> <span class="sc">~</span> <span class="st">"VOX"</span>,</span>
-<span id="cb23-9"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"OTHER"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb23-10"><a href=""></a>  <span class="fu">group_by</span>(codigo_ccaa, party_group) <span class="sc">|&gt;</span> </span>
-<span id="cb23-11"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb23-12"><a href=""></a>    <span class="at">votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb23-13"><a href=""></a>    <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-14"><a href=""></a>  <span class="fu">pivot_wider</span>(</span>
-<span id="cb23-15"><a href=""></a>    <span class="at">names_from =</span> party_group,</span>
-<span id="cb23-16"><a href=""></a>    <span class="at">values_from =</span> votes,</span>
-<span id="cb23-17"><a href=""></a>    <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-18"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb23-19"><a href=""></a>    <span class="at">total_votes =</span> VOX <span class="sc">+</span> OTHER,</span>
-<span id="cb23-20"><a href=""></a>    <span class="at">vox_percentage =</span> (VOX <span class="sc">/</span> total_votes) <span class="sc">*</span> <span class="dv">100</span>)</span>
-<span id="cb23-21"><a href=""></a></span>
-<span id="cb23-22"><a href=""></a><span class="co"># create lookup table with official CCAA codes</span></span>
-<span id="cb23-23"><a href=""></a><span class="co"># this is based on https://www.ine.es/en/daco/daco42/codmun/cod_ccaa_en.htm</span></span>
-<span id="cb23-24"><a href=""></a>ccaa_lookup <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb23-25"><a href=""></a>  <span class="at">codigo_ccaa =</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"0"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>), <span class="fu">as.character</span>(<span class="dv">10</span><span class="sc">:</span><span class="dv">17</span>), <span class="st">"18"</span>, <span class="st">"19"</span>),</span>
-<span id="cb23-26"><a href=""></a>  <span class="at">region =</span> <span class="fu">c</span>(<span class="st">"AND"</span>, <span class="st">"ARA"</span>, <span class="st">"AST"</span>, <span class="st">"BAL"</span>, <span class="st">"CAN"</span>, <span class="st">"CANT"</span>, <span class="st">"CYL"</span>, <span class="st">"CLM"</span>, </span>
-<span id="cb23-27"><a href=""></a>             <span class="st">"CAT"</span>, <span class="st">"VAL"</span>, <span class="st">"EXT"</span>, <span class="st">"GAL"</span>, <span class="st">"MAD"</span>, <span class="st">"MUR"</span>, <span class="st">"NAV"</span>, <span class="st">"PV"</span>, </span>
-<span id="cb23-28"><a href=""></a>             <span class="st">"RIO"</span>, <span class="st">"CyMel"</span>, <span class="st">"CyMel"</span>))</span>
-<span id="cb23-29"><a href=""></a></span>
-<span id="cb23-30"><a href=""></a><span class="co"># join CCAA codes with results and combine Ceuta and Melilla</span></span>
-<span id="cb23-31"><a href=""></a>vox_results_2019_named <span class="ot">&lt;-</span> vox_results_2019 <span class="sc">|&gt;</span> </span>
-<span id="cb23-32"><a href=""></a>  <span class="fu">left_join</span>(ccaa_lookup, <span class="at">by =</span> <span class="st">"codigo_ccaa"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-33"><a href=""></a>  <span class="fu">group_by</span>(region) <span class="sc">|&gt;</span> </span>
-<span id="cb23-34"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb23-35"><a href=""></a>    <span class="at">VOX =</span> <span class="fu">sum</span>(VOX),</span>
-<span id="cb23-36"><a href=""></a>    <span class="at">OTHER =</span> <span class="fu">sum</span>(OTHER),</span>
-<span id="cb23-37"><a href=""></a>    <span class="at">total_votes =</span> <span class="fu">sum</span>(total_votes),</span>
-<span id="cb23-38"><a href=""></a>    <span class="at">vox_percentage =</span> (<span class="fu">sum</span>(VOX) <span class="sc">/</span> <span class="fu">sum</span>(total_votes)) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-39"><a href=""></a>  <span class="fu">arrange</span>(region)</span>
-<span id="cb23-40"><a href=""></a></span>
-<span id="cb23-41"><a href=""></a><span class="co"># now join with GDP growth data</span></span>
-<span id="cb23-42"><a href=""></a>combined_analysis <span class="ot">&lt;-</span> growth_rates <span class="sc">|&gt;</span> </span>
-<span id="cb23-43"><a href=""></a>  <span class="fu">filter</span>(region <span class="sc">!=</span> <span class="st">"total"</span>) <span class="sc">|&gt;</span> <span class="co"># Remove the 'total' row</span></span>
-<span id="cb23-44"><a href=""></a>  <span class="fu">left_join</span>(vox_results_2019_named, <span class="at">by =</span> <span class="st">"region"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-45"><a href=""></a>  <span class="fu">select</span>(region, relative_growth, vox_percentage, growth_category)</span>
-<span id="cb23-46"><a href=""></a></span>
-<span id="cb23-47"><a href=""></a><span class="co"># print combined results</span></span>
-<span id="cb23-48"><a href=""></a><span class="fu">print</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Combined GDP growth and VOX support analysis:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href=""></a>election_data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/processed/election_data.rds"</span>)</span>
+<span id="cb28-2"><a href=""></a></span>
+<span id="cb28-3"><a href=""></a><span class="co"># calculate VOX results by CCAA for November 2019</span></span>
+<span id="cb28-4"><a href=""></a>vox_results_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb28-5"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-6"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb28-7"><a href=""></a>    <span class="at">party_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb28-8"><a href=""></a>      partido_2 <span class="sc">==</span> <span class="st">"VOX"</span> <span class="sc">~</span> <span class="st">"VOX"</span>,</span>
+<span id="cb28-9"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"OTHER"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb28-10"><a href=""></a>  <span class="fu">group_by</span>(codigo_ccaa, party_group) <span class="sc">|&gt;</span> </span>
+<span id="cb28-11"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb28-12"><a href=""></a>    <span class="at">votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb28-13"><a href=""></a>    <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-14"><a href=""></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb28-15"><a href=""></a>    <span class="at">names_from =</span> party_group,</span>
+<span id="cb28-16"><a href=""></a>    <span class="at">values_from =</span> votes,</span>
+<span id="cb28-17"><a href=""></a>    <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-18"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb28-19"><a href=""></a>    <span class="at">total_votes =</span> VOX <span class="sc">+</span> OTHER,</span>
+<span id="cb28-20"><a href=""></a>    <span class="at">vox_percentage =</span> (VOX <span class="sc">/</span> total_votes) <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb28-21"><a href=""></a></span>
+<span id="cb28-22"><a href=""></a><span class="co"># create lookup table with official CCAA codes</span></span>
+<span id="cb28-23"><a href=""></a><span class="co"># this is based on https://www.ine.es/en/daco/daco42/codmun/cod_ccaa_en.htm</span></span>
+<span id="cb28-24"><a href=""></a>ccaa_lookup <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb28-25"><a href=""></a>  <span class="at">codigo_ccaa =</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"0"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>), <span class="fu">as.character</span>(<span class="dv">10</span><span class="sc">:</span><span class="dv">17</span>), <span class="st">"18"</span>, <span class="st">"19"</span>),</span>
+<span id="cb28-26"><a href=""></a>  <span class="at">region =</span> <span class="fu">c</span>(<span class="st">"AND"</span>, <span class="st">"ARA"</span>, <span class="st">"AST"</span>, <span class="st">"BAL"</span>, <span class="st">"CAN"</span>, <span class="st">"CANT"</span>, <span class="st">"CYL"</span>, <span class="st">"CLM"</span>, </span>
+<span id="cb28-27"><a href=""></a>             <span class="st">"CAT"</span>, <span class="st">"VAL"</span>, <span class="st">"EXT"</span>, <span class="st">"GAL"</span>, <span class="st">"MAD"</span>, <span class="st">"MUR"</span>, <span class="st">"NAV"</span>, <span class="st">"PV"</span>, </span>
+<span id="cb28-28"><a href=""></a>             <span class="st">"RIO"</span>, <span class="st">"CyMel"</span>, <span class="st">"CyMel"</span>))</span>
+<span id="cb28-29"><a href=""></a></span>
+<span id="cb28-30"><a href=""></a><span class="co"># join CCAA codes with results and combine Ceuta and Melilla</span></span>
+<span id="cb28-31"><a href=""></a>vox_results_2019_named <span class="ot">&lt;-</span> vox_results_2019 <span class="sc">|&gt;</span> </span>
+<span id="cb28-32"><a href=""></a>  <span class="fu">left_join</span>(ccaa_lookup, <span class="at">by =</span> <span class="st">"codigo_ccaa"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-33"><a href=""></a>  <span class="fu">group_by</span>(region) <span class="sc">|&gt;</span> </span>
+<span id="cb28-34"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb28-35"><a href=""></a>    <span class="at">VOX =</span> <span class="fu">sum</span>(VOX),</span>
+<span id="cb28-36"><a href=""></a>    <span class="at">OTHER =</span> <span class="fu">sum</span>(OTHER),</span>
+<span id="cb28-37"><a href=""></a>    <span class="at">total_votes =</span> <span class="fu">sum</span>(total_votes),</span>
+<span id="cb28-38"><a href=""></a>    <span class="at">vox_percentage =</span> (<span class="fu">sum</span>(VOX) <span class="sc">/</span> <span class="fu">sum</span>(total_votes)) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-39"><a href=""></a>  <span class="fu">arrange</span>(region)</span>
+<span id="cb28-40"><a href=""></a></span>
+<span id="cb28-41"><a href=""></a><span class="co"># now join with GDP growth data</span></span>
+<span id="cb28-42"><a href=""></a>combined_analysis <span class="ot">&lt;-</span> growth_rates <span class="sc">|&gt;</span> </span>
+<span id="cb28-43"><a href=""></a>  <span class="fu">filter</span>(region <span class="sc">!=</span> <span class="st">"total"</span>) <span class="sc">|&gt;</span> <span class="co"># Remove the 'total' row</span></span>
+<span id="cb28-44"><a href=""></a>  <span class="fu">left_join</span>(vox_results_2019_named, <span class="at">by =</span> <span class="st">"region"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-45"><a href=""></a>  <span class="fu">select</span>(region, relative_growth, vox_percentage, growth_category)</span>
+<span id="cb28-46"><a href=""></a></span>
+<span id="cb28-47"><a href=""></a><span class="co"># print combined results</span></span>
+<span id="cb28-48"><a href=""></a><span class="fu">print</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Combined GDP growth and VOX support analysis:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "\nCombined GDP growth and VOX support analysis:"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a><span class="fu">print</span>(combined_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href=""></a><span class="fu">print</span>(combined_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 18 × 4
    region relative_growth vox_percentage growth_category
@@ -1290,36 +1299,36 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 
 <h3 id="analysis-and-scatterplot">Analysis and scatterplot</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href=""></a><span class="co"># calculate correlation (excluding NA values)</span></span>
-<span id="cb27-2"><a href=""></a>correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(combined_analysis<span class="sc">$</span>relative_growth, </span>
-<span id="cb27-3"><a href=""></a>                   combined_analysis<span class="sc">$</span>vox_percentage,</span>
-<span id="cb27-4"><a href=""></a>                   <span class="at">use =</span> <span class="st">"complete.obs"</span>)  <span class="co"># this will exclude NA values</span></span>
-<span id="cb27-5"><a href=""></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Correlation between relative GDP growth and VOX support:"</span>, <span class="fu">round</span>(correlation, <span class="dv">3</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href=""></a><span class="co"># calculate correlation (excluding NA values)</span></span>
+<span id="cb32-2"><a href=""></a>correlation <span class="ot">&lt;-</span> <span class="fu">cor</span>(combined_analysis<span class="sc">$</span>relative_growth, </span>
+<span id="cb32-3"><a href=""></a>                   combined_analysis<span class="sc">$</span>vox_percentage,</span>
+<span id="cb32-4"><a href=""></a>                   <span class="at">use =</span> <span class="st">"complete.obs"</span>)  <span class="co"># this will exclude NA values</span></span>
+<span id="cb32-5"><a href=""></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Correlation between relative GDP growth and VOX support:"</span>, <span class="fu">round</span>(correlation, <span class="dv">3</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "\nCorrelation between relative GDP growth and VOX support: -0.142"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href=""></a><span class="co"># create scatter plot</span></span>
-<span id="cb29-2"><a href=""></a>scatter_plot_1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(combined_analysis, <span class="fu">aes</span>(<span class="at">x =</span> relative_growth, <span class="at">y =</span> vox_percentage)) <span class="sc">+</span></span>
-<span id="cb29-3"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> growth_category), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb29-4"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> region), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb29-5"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> color_palette[<span class="dv">6</span>], <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb29-6"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb29-7"><a href=""></a>    <span class="at">title =</span> <span class="st">"Relationship between Economic Growth and VOX Support"</span>,</span>
-<span id="cb29-8"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"By Autonomous Community (1999-2019)"</span>,</span>
-<span id="cb29-9"><a href=""></a>    <span class="at">x =</span> <span class="st">"Relative GDP per Capita Growth (%)"</span>,</span>
-<span id="cb29-10"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span>,</span>
-<span id="cb29-11"><a href=""></a>    <span class="at">color =</span> <span class="st">"Growth Category"</span></span>
-<span id="cb29-12"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb29-13"><a href=""></a>  <span class="fu">theme_presentation</span>() <span class="sc">+</span></span>
-<span id="cb29-14"><a href=""></a>  <span class="fu">theme</span>(</span>
-<span id="cb29-15"><a href=""></a>    <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb29-16"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href=""></a><span class="co"># create scatter plot</span></span>
+<span id="cb34-2"><a href=""></a>scatter_plot_1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(combined_analysis, <span class="fu">aes</span>(<span class="at">x =</span> relative_growth, <span class="at">y =</span> vox_percentage)) <span class="sc">+</span></span>
+<span id="cb34-3"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> growth_category), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb34-4"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> region), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb34-5"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> color_palette[<span class="dv">6</span>], <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb34-6"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb34-7"><a href=""></a>    <span class="at">title =</span> <span class="st">"Relationship between Economic Growth and VOX Support"</span>,</span>
+<span id="cb34-8"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"By Autonomous Community (1999-2019)"</span>,</span>
+<span id="cb34-9"><a href=""></a>    <span class="at">x =</span> <span class="st">"Relative GDP per Capita Growth (%)"</span>,</span>
+<span id="cb34-10"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span>,</span>
+<span id="cb34-11"><a href=""></a>    <span class="at">color =</span> <span class="st">"Growth Category"</span></span>
+<span id="cb34-12"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb34-13"><a href=""></a>  <span class="fu">theme_presentation</span>() <span class="sc">+</span></span>
+<span id="cb34-14"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb34-15"><a href=""></a>    <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
+<span id="cb34-16"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-34-1.png" width="1152" class="r-stretch"></section>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-33-1.png" width="1152" class="r-stretch"></section>
 <section id="original-exercise-3-voxs-electoral-performance" class="slide level2">
 <h2>Original Exercise 3: Vox’s electoral performance</h2>
 <h3 id="exercise">Exercise:</h3>
@@ -1329,196 +1338,196 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 
 <h3 id="analysing-how-voter-turnout-relates-to-voxs-electoral-success">Analysing how voter turnout relates to Vox’s electoral success</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href=""></a><span class="co"># first, let's create municipality_summary for November 2019 (using both month and year)</span></span>
-<span id="cb30-2"><a href=""></a>municipality_summary_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
-<span id="cb30-3"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span>   <span class="co"># specifying November 2019</span></span>
-<span id="cb30-4"><a href=""></a>  <span class="fu">group_by</span>(municipio) <span class="sc">|&gt;</span> </span>
-<span id="cb30-5"><a href=""></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb30-6"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb30-7"><a href=""></a>    <span class="at">censo =</span> censo,</span>
-<span id="cb30-8"><a href=""></a>    <span class="at">total_votes =</span> votos_candidaturas <span class="sc">+</span> votos_blancos <span class="sc">+</span> votos_nulos,</span>
-<span id="cb30-9"><a href=""></a>    <span class="at">valid_votes =</span> votos_candidaturas,</span>
-<span id="cb30-10"><a href=""></a>    <span class="at">turnout =</span> (total_votes <span class="sc">/</span> censo) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb30-11"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(turnout), turnout <span class="sc">&lt;=</span> <span class="dv">100</span>, turnout <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb30-12"><a href=""></a></span>
-<span id="cb30-13"><a href=""></a><span class="co"># then calculate party votes for the same election</span></span>
-<span id="cb30-14"><a href=""></a>party_votes_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
-<span id="cb30-15"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span>   <span class="co"># again, specifying November 2019</span></span>
-<span id="cb30-16"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb30-17"><a href=""></a>    <span class="at">party_group =</span> <span class="fu">case_when</span>(</span>
-<span id="cb30-18"><a href=""></a>      partido_2 <span class="sc">==</span> <span class="st">"VOX"</span> <span class="sc">~</span> <span class="st">"VOX"</span>,</span>
-<span id="cb30-19"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"OTHER"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb30-20"><a href=""></a>  <span class="fu">group_by</span>(municipio, party_group) <span class="sc">|&gt;</span> </span>
-<span id="cb30-21"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb30-22"><a href=""></a>    <span class="at">votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb30-23"><a href=""></a>    <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb30-24"><a href=""></a>  <span class="fu">pivot_wider</span>(</span>
-<span id="cb30-25"><a href=""></a>    <span class="at">names_from =</span> party_group,</span>
-<span id="cb30-26"><a href=""></a>    <span class="at">values_from =</span> votes,</span>
-<span id="cb30-27"><a href=""></a>    <span class="at">values_fill =</span> <span class="dv">0</span>)</span>
-<span id="cb30-28"><a href=""></a></span>
-<span id="cb30-29"><a href=""></a><span class="co"># join the two objects</span></span>
-<span id="cb30-30"><a href=""></a>final_analysis <span class="ot">&lt;-</span> municipality_summary_2019 <span class="sc">|&gt;</span> </span>
-<span id="cb30-31"><a href=""></a>  <span class="fu">left_join</span>(party_votes_2019, <span class="at">by =</span> <span class="st">"municipio"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb30-32"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb30-33"><a href=""></a>    <span class="at">vox_share =</span> (VOX <span class="sc">/</span> valid_votes) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb30-34"><a href=""></a>  <span class="fu">select</span>(municipio, censo, turnout, vox_share)</span>
-<span id="cb30-35"><a href=""></a></span>
-<span id="cb30-36"><a href=""></a><span class="co"># calculate the correlation</span></span>
-<span id="cb30-37"><a href=""></a><span class="fu">cor</span>(final_analysis<span class="sc">$</span>turnout, final_analysis<span class="sc">$</span>vox_share)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href=""></a><span class="co"># first, let's create municipality_summary for November 2019 (using both month and year)</span></span>
+<span id="cb35-2"><a href=""></a>municipality_summary_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb35-3"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span>   <span class="co"># specifying November 2019</span></span>
+<span id="cb35-4"><a href=""></a>  <span class="fu">group_by</span>(municipio) <span class="sc">|&gt;</span> </span>
+<span id="cb35-5"><a href=""></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-6"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb35-7"><a href=""></a>    <span class="at">censo =</span> censo,</span>
+<span id="cb35-8"><a href=""></a>    <span class="at">total_votes =</span> votos_candidaturas <span class="sc">+</span> votos_blancos <span class="sc">+</span> votos_nulos,</span>
+<span id="cb35-9"><a href=""></a>    <span class="at">valid_votes =</span> votos_candidaturas,</span>
+<span id="cb35-10"><a href=""></a>    <span class="at">turnout =</span> (total_votes <span class="sc">/</span> censo) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-11"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(turnout), turnout <span class="sc">&lt;=</span> <span class="dv">100</span>, turnout <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb35-12"><a href=""></a></span>
+<span id="cb35-13"><a href=""></a><span class="co"># then calculate party votes for the same election</span></span>
+<span id="cb35-14"><a href=""></a>party_votes_2019 <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb35-15"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span>   <span class="co"># again, specifying November 2019</span></span>
+<span id="cb35-16"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb35-17"><a href=""></a>    <span class="at">party_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-18"><a href=""></a>      partido_2 <span class="sc">==</span> <span class="st">"VOX"</span> <span class="sc">~</span> <span class="st">"VOX"</span>,</span>
+<span id="cb35-19"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"OTHER"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb35-20"><a href=""></a>  <span class="fu">group_by</span>(municipio, party_group) <span class="sc">|&gt;</span> </span>
+<span id="cb35-21"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb35-22"><a href=""></a>    <span class="at">votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb35-23"><a href=""></a>    <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-24"><a href=""></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb35-25"><a href=""></a>    <span class="at">names_from =</span> party_group,</span>
+<span id="cb35-26"><a href=""></a>    <span class="at">values_from =</span> votes,</span>
+<span id="cb35-27"><a href=""></a>    <span class="at">values_fill =</span> <span class="dv">0</span>)</span>
+<span id="cb35-28"><a href=""></a></span>
+<span id="cb35-29"><a href=""></a><span class="co"># join the two objects</span></span>
+<span id="cb35-30"><a href=""></a>final_analysis <span class="ot">&lt;-</span> municipality_summary_2019 <span class="sc">|&gt;</span> </span>
+<span id="cb35-31"><a href=""></a>  <span class="fu">left_join</span>(party_votes_2019, <span class="at">by =</span> <span class="st">"municipio"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-32"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb35-33"><a href=""></a>    <span class="at">vox_share =</span> (VOX <span class="sc">/</span> valid_votes) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-34"><a href=""></a>  <span class="fu">select</span>(municipio, censo, turnout, vox_share)</span>
+<span id="cb35-35"><a href=""></a></span>
+<span id="cb35-36"><a href=""></a><span class="co"># calculate the correlation</span></span>
+<span id="cb35-37"><a href=""></a><span class="fu">cor</span>(final_analysis<span class="sc">$</span>turnout, final_analysis<span class="sc">$</span>vox_share)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.003779757</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href=""></a>  <span class="co"># we tested for different sizes of municipalities by adding a population</span></span>
-<span id="cb32-2"><a href=""></a>  <span class="co"># threshold; the correlations were more or less the same</span></span>
-<span id="cb32-3"><a href=""></a></span>
-<span id="cb32-4"><a href=""></a><span class="co"># visualise</span></span>
-<span id="cb32-5"><a href=""></a>turnout_vox_share_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(final_analysis) <span class="sc">+</span></span>
-<span id="cb32-6"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> turnout, <span class="at">y =</span> vox_share), <span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">color =</span> color_palette[<span class="dv">3</span>], <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb32-7"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> turnout, <span class="at">y =</span> vox_share), <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> color_palette[<span class="dv">3</span>]) <span class="sc">+</span></span>
-<span id="cb32-8"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb32-9"><a href=""></a>    <span class="at">title =</span> <span class="st">"Relationship between Turnout and VOX Vote Share (November 2019)"</span>,</span>
-<span id="cb32-10"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"Analysis by Municipality"</span>,</span>
-<span id="cb32-11"><a href=""></a>    <span class="at">x =</span> <span class="st">"Voter Turnout (%)"</span>,</span>
-<span id="cb32-12"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span></span>
-<span id="cb32-13"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb32-14"><a href=""></a>  <span class="fu">theme_presentation</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href=""></a>  <span class="co"># we tested for different sizes of municipalities by adding a population</span></span>
+<span id="cb37-2"><a href=""></a>  <span class="co"># threshold; the correlations were more or less the same</span></span>
+<span id="cb37-3"><a href=""></a></span>
+<span id="cb37-4"><a href=""></a><span class="co"># visualise</span></span>
+<span id="cb37-5"><a href=""></a>turnout_vox_share_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(final_analysis) <span class="sc">+</span></span>
+<span id="cb37-6"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> turnout, <span class="at">y =</span> vox_share), <span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">color =</span> color_palette[<span class="dv">3</span>], <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb37-7"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> turnout, <span class="at">y =</span> vox_share), <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">color =</span> color_palette[<span class="dv">3</span>]) <span class="sc">+</span></span>
+<span id="cb37-8"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb37-9"><a href=""></a>    <span class="at">title =</span> <span class="st">"Relationship between Turnout and VOX Vote Share (November 2019)"</span>,</span>
+<span id="cb37-10"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"Analysis by Municipality"</span>,</span>
+<span id="cb37-11"><a href=""></a>    <span class="at">x =</span> <span class="st">"Voter Turnout (%)"</span>,</span>
+<span id="cb37-12"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span></span>
+<span id="cb37-13"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb37-14"><a href=""></a>  <span class="fu">theme_presentation</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-36-1.png" width="1152" class="r-stretch"></section>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-35-1.png" width="1152" class="r-stretch"></section>
 <section class="slide level2">
 
 <h3 id="visualising-the-geographic-concentration-in-the-support-of-vox">Visualising the geographic concentration in the support of Vox</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href=""></a>regional_analysis <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
-<span id="cb33-2"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb33-3"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia) <span class="sc">|&gt;</span>  </span>
-<span id="cb33-4"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
-<span id="cb33-5"><a href=""></a>            <span class="at">vox_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"VOX"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>)</span>
-<span id="cb33-6"><a href=""></a></span>
-<span id="cb33-7"><a href=""></a><span class="co"># get geospatial data for Spanish provinces</span></span>
-<span id="cb33-8"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">esp_get_prov</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb33-9"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb33-10"><a href=""></a>    <span class="at">provincia =</span> prov.shortname.en,</span>
-<span id="cb33-11"><a href=""></a>    <span class="at">codigo_provincia =</span> <span class="fu">as.character</span>(cpro)) <span class="sc">|&gt;</span> </span>
-<span id="cb33-12"><a href=""></a>  <span class="fu">select</span>(provincia, codigo_provincia)</span>
-<span id="cb33-13"><a href=""></a></span>
-<span id="cb33-14"><a href=""></a><span class="co"># transform to Mercator projection</span></span>
-<span id="cb33-15"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(provinces, <span class="dv">3857</span>)</span>
-<span id="cb33-16"><a href=""></a></span>
-<span id="cb33-17"><a href=""></a><span class="co"># get population data</span></span>
-<span id="cb33-18"><a href=""></a>pop_prov <span class="ot">&lt;-</span> mapSpain<span class="sc">::</span>pobmun19 <span class="sc">|&gt;</span> </span>
-<span id="cb33-19"><a href=""></a>  <span class="fu">rename</span>(<span class="at">codigo_provincia =</span> cpro) <span class="sc">|&gt;</span> </span>
-<span id="cb33-20"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">codigo_provincia =</span> <span class="fu">as.character</span>(codigo_provincia)) <span class="sc">|&gt;</span> </span>
-<span id="cb33-21"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia) <span class="sc">|&gt;</span> </span>
-<span id="cb33-22"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">n_pop =</span> <span class="fu">sum</span>(pob19))</span>
-<span id="cb33-23"><a href=""></a></span>
-<span id="cb33-24"><a href=""></a><span class="co"># join all data</span></span>
-<span id="cb33-25"><a href=""></a>final_data <span class="ot">&lt;-</span> provinces <span class="sc">%&gt;%</span></span>
-<span id="cb33-26"><a href=""></a>  <span class="fu">left_join</span>(pop_prov, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb33-27"><a href=""></a>  <span class="fu">left_join</span>(regional_analysis, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>)</span>
-<span id="cb33-28"><a href=""></a></span>
-<span id="cb33-29"><a href=""></a><span class="co"># set up font</span></span>
-<span id="cb33-30"><a href=""></a>sysfonts<span class="sc">::</span><span class="fu">font_add_google</span>(<span class="st">"Roboto Condensed"</span>, <span class="at">family =</span> <span class="st">"rob_cond"</span>)</span>
-<span id="cb33-31"><a href=""></a>showtext<span class="sc">::</span><span class="fu">showtext_auto</span>()</span>
-<span id="cb33-32"><a href=""></a></span>
-<span id="cb33-33"><a href=""></a><span class="co"># create color palette for VOX vote share</span></span>
-<span id="cb33-34"><a href=""></a>vox_colors <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">"#FFFFFF"</span>, party_colors[<span class="st">"VOX"</span>]))(<span class="dv">5</span>)</span>
-<span id="cb33-35"><a href=""></a></span>
-<span id="cb33-36"><a href=""></a><span class="co"># create Dorling cartogram</span></span>
-<span id="cb33-37"><a href=""></a>cartogram_plot <span class="ot">&lt;-</span> <span class="fu">cartogram_dorling</span>(final_data, <span class="at">weight =</span> <span class="st">"n_pop"</span>)</span>
-<span id="cb33-38"><a href=""></a></span>
-<span id="cb33-39"><a href=""></a><span class="co"># create the final plot</span></span>
-<span id="cb33-40"><a href=""></a>cartogram_vox_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(cartogram_plot) <span class="sc">+</span></span>
-<span id="cb33-41"><a href=""></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> vox_share)) <span class="sc">+</span></span>
-<span id="cb33-42"><a href=""></a>  <span class="fu">scale_fill_gradientn</span>(</span>
-<span id="cb33-43"><a href=""></a>    <span class="at">colors =</span> vox_colors,</span>
-<span id="cb33-44"><a href=""></a>    <span class="at">name =</span> <span class="st">"VOX Vote Share (%)"</span>,</span>
-<span id="cb33-45"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(regional_analysis<span class="sc">$</span>vox_share)),</span>
-<span id="cb33-46"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(regional_analysis<span class="sc">$</span>vox_share), <span class="at">length.out =</span> <span class="dv">5</span>),</span>
-<span id="cb33-47"><a href=""></a>    <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>(<span class="at">accuracy =</span> <span class="fl">0.1</span>)) <span class="sc">+</span></span>
-<span id="cb33-48"><a href=""></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb33-49"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb33-50"><a href=""></a>    <span class="at">title =</span> <span class="st">"VOX Vote Share by Province (November 2019)"</span>,</span>
-<span id="cb33-51"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"Circle size represents province population"</span>) <span class="sc">+</span></span>
-<span id="cb33-52"><a href=""></a>  <span class="fu">theme</span>(</span>
-<span id="cb33-53"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(</span>
-<span id="cb33-54"><a href=""></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
-<span id="cb33-55"><a href=""></a>      <span class="at">margin =</span> <span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>), <span class="st">"cm"</span>),</span>
-<span id="cb33-56"><a href=""></a>      <span class="at">size =</span> <span class="dv">18</span>,</span>
-<span id="cb33-57"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>),</span>
-<span id="cb33-58"><a href=""></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(</span>
-<span id="cb33-59"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
-<span id="cb33-60"><a href=""></a>      <span class="at">size =</span> <span class="dv">14</span>),</span>
-<span id="cb33-61"><a href=""></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(</span>
-<span id="cb33-62"><a href=""></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
-<span id="cb33-63"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
-<span id="cb33-64"><a href=""></a>      <span class="at">size =</span> <span class="dv">15</span>),</span>
-<span id="cb33-65"><a href=""></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(</span>
-<span id="cb33-66"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
-<span id="cb33-67"><a href=""></a>      <span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href=""></a>regional_analysis <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb38-2"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb38-3"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia) <span class="sc">|&gt;</span>  </span>
+<span id="cb38-4"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb38-5"><a href=""></a>            <span class="at">vox_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"VOX"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb38-6"><a href=""></a></span>
+<span id="cb38-7"><a href=""></a><span class="co"># get geospatial data for Spanish provinces</span></span>
+<span id="cb38-8"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">esp_get_prov</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb38-9"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb38-10"><a href=""></a>    <span class="at">provincia =</span> prov.shortname.en,</span>
+<span id="cb38-11"><a href=""></a>    <span class="at">codigo_provincia =</span> <span class="fu">as.character</span>(cpro)) <span class="sc">|&gt;</span> </span>
+<span id="cb38-12"><a href=""></a>  <span class="fu">select</span>(provincia, codigo_provincia)</span>
+<span id="cb38-13"><a href=""></a></span>
+<span id="cb38-14"><a href=""></a><span class="co"># transform to Mercator projection</span></span>
+<span id="cb38-15"><a href=""></a>provinces <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(provinces, <span class="dv">3857</span>)</span>
+<span id="cb38-16"><a href=""></a></span>
+<span id="cb38-17"><a href=""></a><span class="co"># get population data</span></span>
+<span id="cb38-18"><a href=""></a>pop_prov <span class="ot">&lt;-</span> mapSpain<span class="sc">::</span>pobmun19 <span class="sc">|&gt;</span> </span>
+<span id="cb38-19"><a href=""></a>  <span class="fu">rename</span>(<span class="at">codigo_provincia =</span> cpro) <span class="sc">|&gt;</span> </span>
+<span id="cb38-20"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">codigo_provincia =</span> <span class="fu">as.character</span>(codigo_provincia)) <span class="sc">|&gt;</span> </span>
+<span id="cb38-21"><a href=""></a>  <span class="fu">group_by</span>(codigo_provincia) <span class="sc">|&gt;</span> </span>
+<span id="cb38-22"><a href=""></a>  <span class="fu">summarise</span>(<span class="at">n_pop =</span> <span class="fu">sum</span>(pob19))</span>
+<span id="cb38-23"><a href=""></a></span>
+<span id="cb38-24"><a href=""></a><span class="co"># join all data</span></span>
+<span id="cb38-25"><a href=""></a>final_data <span class="ot">&lt;-</span> provinces <span class="sc">%&gt;%</span></span>
+<span id="cb38-26"><a href=""></a>  <span class="fu">left_join</span>(pop_prov, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb38-27"><a href=""></a>  <span class="fu">left_join</span>(regional_analysis, <span class="at">by =</span> <span class="st">"codigo_provincia"</span>)</span>
+<span id="cb38-28"><a href=""></a></span>
+<span id="cb38-29"><a href=""></a><span class="co"># set up font</span></span>
+<span id="cb38-30"><a href=""></a>sysfonts<span class="sc">::</span><span class="fu">font_add_google</span>(<span class="st">"Roboto Condensed"</span>, <span class="at">family =</span> <span class="st">"rob_cond"</span>)</span>
+<span id="cb38-31"><a href=""></a>showtext<span class="sc">::</span><span class="fu">showtext_auto</span>()</span>
+<span id="cb38-32"><a href=""></a></span>
+<span id="cb38-33"><a href=""></a><span class="co"># create color palette for VOX vote share</span></span>
+<span id="cb38-34"><a href=""></a>vox_colors <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">"#FFFFFF"</span>, party_colors[<span class="st">"VOX"</span>]))(<span class="dv">5</span>)</span>
+<span id="cb38-35"><a href=""></a></span>
+<span id="cb38-36"><a href=""></a><span class="co"># create Dorling cartogram</span></span>
+<span id="cb38-37"><a href=""></a>cartogram_plot <span class="ot">&lt;-</span> <span class="fu">cartogram_dorling</span>(final_data, <span class="at">weight =</span> <span class="st">"n_pop"</span>)</span>
+<span id="cb38-38"><a href=""></a></span>
+<span id="cb38-39"><a href=""></a><span class="co"># create the final plot</span></span>
+<span id="cb38-40"><a href=""></a>cartogram_vox_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(cartogram_plot) <span class="sc">+</span></span>
+<span id="cb38-41"><a href=""></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> vox_share)) <span class="sc">+</span></span>
+<span id="cb38-42"><a href=""></a>  <span class="fu">scale_fill_gradientn</span>(</span>
+<span id="cb38-43"><a href=""></a>    <span class="at">colors =</span> vox_colors,</span>
+<span id="cb38-44"><a href=""></a>    <span class="at">name =</span> <span class="st">"VOX Vote Share (%)"</span>,</span>
+<span id="cb38-45"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(regional_analysis<span class="sc">$</span>vox_share)),</span>
+<span id="cb38-46"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(regional_analysis<span class="sc">$</span>vox_share), <span class="at">length.out =</span> <span class="dv">5</span>),</span>
+<span id="cb38-47"><a href=""></a>    <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>(<span class="at">accuracy =</span> <span class="fl">0.1</span>)) <span class="sc">+</span></span>
+<span id="cb38-48"><a href=""></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb38-49"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb38-50"><a href=""></a>    <span class="at">title =</span> <span class="st">"VOX Vote Share by Province (November 2019)"</span>,</span>
+<span id="cb38-51"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"Circle size represents province population"</span>) <span class="sc">+</span></span>
+<span id="cb38-52"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb38-53"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-54"><a href=""></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb38-55"><a href=""></a>      <span class="at">margin =</span> <span class="fu">unit</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">0</span>), <span class="st">"cm"</span>),</span>
+<span id="cb38-56"><a href=""></a>      <span class="at">size =</span> <span class="dv">18</span>,</span>
+<span id="cb38-57"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>),</span>
+<span id="cb38-58"><a href=""></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-59"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
+<span id="cb38-60"><a href=""></a>      <span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb38-61"><a href=""></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-62"><a href=""></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb38-63"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
+<span id="cb38-64"><a href=""></a>      <span class="at">size =</span> <span class="dv">15</span>),</span>
+<span id="cb38-65"><a href=""></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-66"><a href=""></a>      <span class="at">family =</span> <span class="st">"rob_cond"</span>,</span>
+<span id="cb38-67"><a href=""></a>      <span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-38-1.png" width="1152" class="r-stretch"></section>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-37-1.png" width="1152" class="r-stretch"></section>
 <section class="slide level2">
 
 <h3 id="studying-electoral-fragmentation">Studying electoral fragmentation</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href=""></a>fragmentation_analysis <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
-<span id="cb34-2"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb34-3"><a href=""></a>  <span class="fu">group_by</span>(municipio) <span class="sc">|&gt;</span> </span>
-<span id="cb34-4"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb34-5"><a href=""></a>    <span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb34-6"><a href=""></a>    <span class="at">vox_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"VOX"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb34-7"><a href=""></a>    <span class="at">pp_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"PARTIDO POPULAR"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb34-8"><a href=""></a>    <span class="at">psoe_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"PARTIDO SOCIALISTA OBRERO ESPAÑOL"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb34-9"><a href=""></a>    <span class="at">traditional_share =</span> pp_share <span class="sc">+</span> psoe_share,  <span class="co"># combined share of traditional parties</span></span>
-<span id="cb34-10"><a href=""></a>    <span class="at">effective_parties =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sum</span>((num_votos<span class="sc">/</span>total_votes)<span class="sc">^</span><span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb34-11"><a href=""></a></span>
-<span id="cb34-12"><a href=""></a><span class="co"># first visualisation: scatter plot of VOX share vs effective number of parties</span></span>
-<span id="cb34-13"><a href=""></a>fragmentation_analysis_1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fragmentation_analysis) <span class="sc">+</span></span>
-<span id="cb34-14"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> effective_parties, <span class="at">y =</span> vox_share), </span>
-<span id="cb34-15"><a href=""></a>             <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> color_palette[<span class="dv">3</span>]) <span class="sc">+</span></span>
-<span id="cb34-16"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> effective_parties, <span class="at">y =</span> vox_share), </span>
-<span id="cb34-17"><a href=""></a>              <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> color_palette[<span class="dv">2</span>]) <span class="sc">+</span></span>
-<span id="cb34-18"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb34-19"><a href=""></a>    <span class="at">title =</span> <span class="st">"VOX Support vs Electoral Fragmentation"</span>,</span>
-<span id="cb34-20"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"November 2019 Elections"</span>,</span>
-<span id="cb34-21"><a href=""></a>    <span class="at">x =</span> <span class="st">"Effective Number of Parties"</span>,</span>
-<span id="cb34-22"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span></span>
-<span id="cb34-23"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb34-24"><a href=""></a>  <span class="fu">theme_presentation</span>()</span>
-<span id="cb34-25"><a href=""></a></span>
-<span id="cb34-26"><a href=""></a><span class="co"># second visualisation: scatter plot with traditional party share</span></span>
-<span id="cb34-27"><a href=""></a>fragmentation_analysis_2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fragmentation_analysis) <span class="sc">+</span></span>
-<span id="cb34-28"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> traditional_share, <span class="at">y =</span> vox_share), </span>
-<span id="cb34-29"><a href=""></a>             <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> color_palette[<span class="dv">6</span>]) <span class="sc">+</span></span>
-<span id="cb34-30"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> traditional_share, <span class="at">y =</span> vox_share), </span>
-<span id="cb34-31"><a href=""></a>              <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> color_palette[<span class="dv">10</span>]) <span class="sc">+</span></span>
-<span id="cb34-32"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb34-33"><a href=""></a>    <span class="at">title =</span> <span class="st">"VOX Support vs Traditional Party Support"</span>,</span>
-<span id="cb34-34"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"November 2019 Elections"</span>,</span>
-<span id="cb34-35"><a href=""></a>    <span class="at">x =</span> <span class="st">"Combined PP + PSOE Vote Share (%)"</span>,</span>
-<span id="cb34-36"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span>) <span class="sc">+</span></span>
-<span id="cb34-37"><a href=""></a>  <span class="fu">theme_presentation</span>()</span>
-<span id="cb34-38"><a href=""></a></span>
-<span id="cb34-39"><a href=""></a><span class="co"># calculate correlations</span></span>
-<span id="cb34-40"><a href=""></a>cor_analysis <span class="ot">&lt;-</span> fragmentation_analysis <span class="sc">|&gt;</span> </span>
-<span id="cb34-41"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb34-42"><a href=""></a>    <span class="at">cor_fragmentation =</span> <span class="fu">cor</span>(effective_parties, vox_share, <span class="at">use =</span> <span class="st">"complete.obs"</span>),</span>
-<span id="cb34-43"><a href=""></a>    <span class="at">cor_traditional =</span> <span class="fu">cor</span>(traditional_share, vox_share, <span class="at">use =</span> <span class="st">"complete.obs"</span>))</span>
-<span id="cb34-44"><a href=""></a></span>
-<span id="cb34-45"><a href=""></a><span class="fu">print</span>(<span class="st">"Correlation Analysis:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href=""></a>fragmentation_analysis <span class="ot">&lt;-</span> election_data <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a href=""></a>  <span class="fu">filter</span>(anno <span class="sc">==</span> <span class="dv">2019</span>, mes <span class="sc">==</span> <span class="dv">11</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb39-3"><a href=""></a>  <span class="fu">group_by</span>(municipio) <span class="sc">|&gt;</span> </span>
+<span id="cb39-4"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb39-5"><a href=""></a>    <span class="at">total_votes =</span> <span class="fu">sum</span>(num_votos, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb39-6"><a href=""></a>    <span class="at">vox_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"VOX"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb39-7"><a href=""></a>    <span class="at">pp_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"PARTIDO POPULAR"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb39-8"><a href=""></a>    <span class="at">psoe_share =</span> <span class="fu">sum</span>(num_votos[partido_2 <span class="sc">==</span> <span class="st">"PARTIDO SOCIALISTA OBRERO ESPAÑOL"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span> total_votes <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb39-9"><a href=""></a>    <span class="at">traditional_share =</span> pp_share <span class="sc">+</span> psoe_share,  <span class="co"># combined share of traditional parties</span></span>
+<span id="cb39-10"><a href=""></a>    <span class="at">effective_parties =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sum</span>((num_votos<span class="sc">/</span>total_votes)<span class="sc">^</span><span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb39-11"><a href=""></a></span>
+<span id="cb39-12"><a href=""></a><span class="co"># first visualisation: scatter plot of VOX share vs effective number of parties</span></span>
+<span id="cb39-13"><a href=""></a>fragmentation_analysis_1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fragmentation_analysis) <span class="sc">+</span></span>
+<span id="cb39-14"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> effective_parties, <span class="at">y =</span> vox_share), </span>
+<span id="cb39-15"><a href=""></a>             <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> color_palette[<span class="dv">3</span>]) <span class="sc">+</span></span>
+<span id="cb39-16"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> effective_parties, <span class="at">y =</span> vox_share), </span>
+<span id="cb39-17"><a href=""></a>              <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> color_palette[<span class="dv">2</span>]) <span class="sc">+</span></span>
+<span id="cb39-18"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb39-19"><a href=""></a>    <span class="at">title =</span> <span class="st">"VOX Support vs Electoral Fragmentation"</span>,</span>
+<span id="cb39-20"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"November 2019 Elections"</span>,</span>
+<span id="cb39-21"><a href=""></a>    <span class="at">x =</span> <span class="st">"Effective Number of Parties"</span>,</span>
+<span id="cb39-22"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span></span>
+<span id="cb39-23"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb39-24"><a href=""></a>  <span class="fu">theme_presentation</span>()</span>
+<span id="cb39-25"><a href=""></a></span>
+<span id="cb39-26"><a href=""></a><span class="co"># second visualisation: scatter plot with traditional party share</span></span>
+<span id="cb39-27"><a href=""></a>fragmentation_analysis_2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fragmentation_analysis) <span class="sc">+</span></span>
+<span id="cb39-28"><a href=""></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> traditional_share, <span class="at">y =</span> vox_share), </span>
+<span id="cb39-29"><a href=""></a>             <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">color =</span> color_palette[<span class="dv">6</span>]) <span class="sc">+</span></span>
+<span id="cb39-30"><a href=""></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">x =</span> traditional_share, <span class="at">y =</span> vox_share), </span>
+<span id="cb39-31"><a href=""></a>              <span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> color_palette[<span class="dv">10</span>]) <span class="sc">+</span></span>
+<span id="cb39-32"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb39-33"><a href=""></a>    <span class="at">title =</span> <span class="st">"VOX Support vs Traditional Party Support"</span>,</span>
+<span id="cb39-34"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">"November 2019 Elections"</span>,</span>
+<span id="cb39-35"><a href=""></a>    <span class="at">x =</span> <span class="st">"Combined PP + PSOE Vote Share (%)"</span>,</span>
+<span id="cb39-36"><a href=""></a>    <span class="at">y =</span> <span class="st">"VOX Vote Share (%)"</span>) <span class="sc">+</span></span>
+<span id="cb39-37"><a href=""></a>  <span class="fu">theme_presentation</span>()</span>
+<span id="cb39-38"><a href=""></a></span>
+<span id="cb39-39"><a href=""></a><span class="co"># calculate correlations</span></span>
+<span id="cb39-40"><a href=""></a>cor_analysis <span class="ot">&lt;-</span> fragmentation_analysis <span class="sc">|&gt;</span> </span>
+<span id="cb39-41"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb39-42"><a href=""></a>    <span class="at">cor_fragmentation =</span> <span class="fu">cor</span>(effective_parties, vox_share, <span class="at">use =</span> <span class="st">"complete.obs"</span>),</span>
+<span id="cb39-43"><a href=""></a>    <span class="at">cor_traditional =</span> <span class="fu">cor</span>(traditional_share, vox_share, <span class="at">use =</span> <span class="st">"complete.obs"</span>))</span>
+<span id="cb39-44"><a href=""></a></span>
+<span id="cb39-45"><a href=""></a><span class="fu">print</span>(<span class="st">"Correlation Analysis:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Correlation Analysis:"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href=""></a><span class="fu">print</span>(cor_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href=""></a><span class="fu">print</span>(cor_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
   cor_fragmentation cor_traditional
@@ -1530,11 +1539,11 @@ Gina Tedesco, Marvin-Julian Struckmeyer, Ekin Kizildas, Aurora Sterpellone, Este
 <section class="slide level2">
 
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-40-1.png" width="1152" class="r-stretch"></section>
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-39-1.png" width="1152" class="r-stretch"></section>
 <section class="slide level2">
 
 
-<img data-src="presentation_files/figure-revealjs/unnamed-chunk-41-1.png" width="1152" class="r-stretch"><div class="quarto-auto-generated-content">
+<img data-src="presentation_files/figure-revealjs/unnamed-chunk-40-1.png" width="1152" class="r-stretch"><div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
 </div>

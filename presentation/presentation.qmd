@@ -365,6 +365,8 @@ parliamentary_plot
 ## Exercise 4
 How to analyze the relationship between census and vote? Is it true that certain parties win in rural areas?
 ```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
 # Define rural and urban areas
 election_data <- election_data |> 
   mutate(area_type = case_when(
@@ -399,8 +401,12 @@ print(votingpatterns_plot)
 ```
 
 ------------------------------------------------------------------------
-Relationship between census size and vote share
+
+### Relationship between census size and vote share
+
 ```{r}
+election_data <- readRDS("data/processed/election_data.rds")
+
 # Analyze relationship between census size and vote share
 census_vote <- election_data |> 
   group_by(censo, siglas) |> 
@@ -415,7 +421,9 @@ print(correlation_results)
 ```
 
 ------------------------------------------------------------------------
-Winning Parties in Rural Areas
+
+### Winning Parties in Rural Areas
+
 ```{r}
 # Additional analysis: Top parties in rural areas
 rural_winners <- election_data |> 
@@ -450,7 +458,9 @@ print(ruralareas_parties_plot)
 ```
 
 ------------------------------------------------------------------------
-Vote Percentage Distribution by Party in Rural Areas
+
+### Vote Percentage Distribution by Party in Rural Areas
+
 ```{r}
 # Faceted Histograms: split histogram into separate panels for each party.
 faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
@@ -474,7 +484,9 @@ print(faceted_plot)
 ```
 
 ------------------------------------------------------------------------
-Vote Percentage Distribution by Party in Rural Areas
+
+### Vote Percentage Distribution by Party in Rural Areas
+
 ```{r}
 ## !! Overlapping Line Charts (Frequency Polygons)
 overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
