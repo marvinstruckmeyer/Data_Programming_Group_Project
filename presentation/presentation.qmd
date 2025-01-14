@@ -467,58 +467,6 @@ print(ruralareas_parties_plot)
 
 ------------------------------------------------------------------------
 
-### Vote Percentage Distribution by Party in Rural Areas
-
-```{r}
-# Faceted Histograms: split histogram into separate panels for each party.
-faceted_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, fill = siglas)) +
-  geom_histogram(binwidth = 3, color = "white") +
-  facet_wrap(~ siglas, scales = "free_y") +
-  scale_fill_manual(values = party_colors) +
-  labs(title = "Vote Percentage Distribution by Party in Rural Areas",
-       x = "Percentage of Votes",
-       y = "Frequency") +
-  theme_minimal()
-```
-
-------------------------------------------------------------------------
-
-```{r}
-#| echo: false
-#| fig-width: 12
-#| fig-height: 8
-
-print(faceted_plot)
-```
-
-------------------------------------------------------------------------
-
-### Vote Percentage Distribution by Party in Rural Areas
-
-```{r}
-## !! Overlapping Line Charts (Frequency Polygons)
-overlapping_plot <- ggplot(election_data, aes(x = num_votos / censo * 100, color = siglas)) +
-  geom_freqpoly(binwidth = 2, size = 1) +
-  scale_color_manual(values = party_colors) +
-  labs(title = "Vote Percentage Distribution by Party in Rural Areas",
-       x = "Percentage of Votes",
-       y = "Frequency",
-       color = "Party") +
-  theme_minimal()
-```
-
-------------------------------------------------------------------------
-
-```{r}
-#| echo: false
-#| fig-width: 12
-#| fig-height: 8
-
-print(overlapping_plot)
-```
-
-------------------------------------------------------------------------
-
 ## Exercise 5
 
 ### How to calibrate the error of the polls (remember that the polls are voting intentions at national level)?
@@ -1046,16 +994,6 @@ turnout_vox_share_plot <- ggplot(final_analysis) +
     y = "VOX Vote Share (%)"
   ) +
   theme_presentation()
-```
-
-------------------------------------------------------------------------
-
-```{r}
-#| echo: false
-#| fig-width: 12
-#| fig-height: 8
-
-turnout_vox_share_plot
 ```
 
 ------------------------------------------------------------------------
